@@ -1,6 +1,7 @@
 <div class="result-stats">
     <div ng-hide="flip || !notChosenCount">Waiting for {{notChosenCount}} people...</div>
-    <div ng-show="flip">Average score: {{averageScore}}</div>
+    <div ng-show="flip">Average SP: {{averageScore}}</div>
+    <div ng-show="flip" class="btn btn-default" ng-click="reset()">Reset</div>
 </div>
 <div class="result-container">
     <card ng-repeat="card in cards" card="card" flip="flip"></card>

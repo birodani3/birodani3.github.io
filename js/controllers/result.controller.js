@@ -21,7 +21,6 @@
             });
         });
         message.listen("USER_JOINED", function(username) {
-            console.log("jött USER_JOINED: ", username);
             var card = {
                 user: username,
                 value: null
@@ -39,10 +38,19 @@
             }
         });
 
+        $scope.reset = function() {
+            $scope.flip = false;
+
+            $scope.cards.forEach(function(card) {
+                card.value = null;
+            });
+
+            checkStats();
+        }
+
         function checkStats() {
-            $rootScope.$apply();
             var done = $scope.cards.every(function(card) {
-                return card.value;
+                return card.value != null;
             });
 
             if (done) {
@@ -65,6 +73,8 @@
                     })
                     .length;
             }
+
+            $rootScope.$$phase || $rootScope.$apply();
         }
     }
 
