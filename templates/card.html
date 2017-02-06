@@ -1,0 +1,8 @@
+<div class="card-container">
+    <div class="card-placeholder" ng-hide="vm.flip">
+        <span ng-hide="vm.card.value">...</span>
+        <span ng-show="vm.card.value">✔</span>
+    </div>
+    <div class="card-value" ng-show="vm.flip">{{vm.card.value}}</div>
+    <div class="user-name">{{vm.card.user}}</div>
+</div>

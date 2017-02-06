@@ -1,0 +1,11 @@
+<div class="loginmodal-container">
+    <h1>Login</h1><br>
+    <form>
+        <input type="text" ng-model="newUser.name" placeholder="Username">
+        <span class="input-group-addon" id="create-room">Create</span>
+        <input type="text" class="form-control" placeholder="room" ng-change="newUser.joinRoom = ''" ng-model="newUser.newRoom" aria-describedby="join-room">
+        <span class="input-group-addon" id="join-room">Join</span>
+        <input type="text" class="form-control" placeholder="room" ng-change="newUser.newRoom = ''" ng-model="newUser.joinRoom" aria-describedby="join-room">
+        <input type="submit" name="login" class="login loginmodal-submit" ng-click="login(newUser)">
+    </form>
+</div>

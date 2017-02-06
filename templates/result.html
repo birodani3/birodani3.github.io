@@ -1,0 +1,7 @@
+<div class="result-stats">
+    <div ng-hide="flip">Waiting for {{notChosenCount || 0}} people...</div>
+    <div ng-show="flip">Average score: {{averageScore}}</div>
+</div>
+<div class="result-container">
+    <card ng-repeat="card in cards" card="card" flip="flip"></card>
+</div>

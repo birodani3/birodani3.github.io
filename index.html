@@ -1,0 +1,33 @@
+<HTML>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=600" />
+	<head>
+        <link rel="stylesheet" type="text/css" href="style/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="style/app.css" />
+		
+        <script src="/node_modules/angular/angular.min.js"></script>
+        <script src="/node_modules/angular-cookies/angular-cookies.min.js"></script>
+        <script src="/node_modules/angular-route/angular-route.min.js"></script>
+        <script src="//cdn.pubnub.com/sdk/javascript/pubnub.4.4.2.min.js"></script>
+
+		<script src="/js/app.module.js"></script>
+        <script src="/js/app.config.js"></script>
+        <script src="/js/factories/message.factory.js"></script>
+        <script src="/js/controllers/result.controller.js"></script>
+        <script src="/js/controllers/estimate.controller.js"></script>
+        <script src="/js/components/card.component.js"></script>
+	</head>
+    <body ng-app="estimate">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <span class="navbar-brand">Estimate</span>
+                </div>
+                <p class="navbar-text" ng-show="!!user">     </p>
+                <p class="navbar-text navbar-right" style="margin-right: 0" ng-show="!!user">{{user.name}} at {{user.room}}     </p>
+            </div>
+        </nav>
+
+        <div ng-view></div>
+    </body>
+</HTML>
