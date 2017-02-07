@@ -113,16 +113,16 @@ nav.navbar p.navbar-right {
     background-color: #357ae8;
 }
 
-/* ---------------------------------------------------------- STATS ---------------------------------------------------------- */
+/* ---------------------------------------------------------- BUTTONS ---------------------------------------------------------- */
 
-.result-stats {
+.result-buttons {
     width: 100%;
-    height: 85px;
-    padding: 0 20px;
-    font-size: 60px;
+    height: 94px;
+    padding: 30px;
+    font-size: 38px;
 }
 
-.result-stats > div {
+.result-buttons > div {
     display: inline-block;
 }
 
@@ -152,6 +152,14 @@ nav.navbar p.navbar-right {
     background-color: #2670e0;
 }
 
+.card-container .card-value.highest {
+    background-color: #66cc00;
+}
+
+.card-container .card-value.lowest {
+    background-color: #cc0000;
+}
+
 .card-container .card-value {
     font-size: 126px;
     padding: 18% 0;
@@ -162,4 +170,35 @@ nav.navbar p.navbar-right {
     padding: 10% 0;
     text-align: center;
     font-weight: bold;
+}
+
+/* ---------------------------------------------------------- CARD PICK ---------------------------------------------------------- */
+
+.card-pick-container {
+    user-select: none;
+    padding: 6px;
+}
+
+/* (600 - (2*6 padding + 6*10 margin)) / 3 = 176 */
+.card-pick-container .card {
+    width: 176px;
+    height: 192px;
+    margin: 10px;
+    opacity: 1;
+    display: inline-block;
+    background-color: #2670e0;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 120px;
+    line-height: 176px;
+}
+
+.card-pick-container .card.fade {
+    visibility: hidden;
+}
+
+.card-pick-container .card.selected {
+    transition: opacity 2s;
+    opacity: 0;
 }

@@ -1,5 +1,3 @@
-<div class="form-group">
-    <label for="sel1">Select SP:</label>
-    <select class="form-control" id="sel1" ng-options="num as num for num in numbers" ng-model="selectedSp" ng-change="send(selectedSp)">
-    </select>
+<div class="card-pick-container">
+    <div ng-repeat="value in values" ng-class="{ 'fade': selected && !isSelected(value), 'selected': isSelected(value) }" class="card" ng-click="selectCard(value)">{{value}}</div>
 </div>

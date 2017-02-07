@@ -5,22 +5,21 @@
         .module('estimate')
         .controller('ResultController', ResultController);
 
-    ResultController.$inject = ['$rootScope', '$scope', '$timeout', 'message'];
+    ResultController.$inject = ['$rootScope', '$scope', '$timeout', 'msgService'];
 
-    function ResultController ($rootScope, $scope, $timeout, message) {
+    function ResultController ($rootScope, $scope, $timeout, msgService) {
         $scope.flip = false;
         $scope.cards = [];
 
-        message.subscribe($rootScope.user.room);
-        message.listen("ANY", function() {
+        msgService.listen("ANY", function() {
             $timeout(checkStats);
         });
-        message.listen("USER_LEFT", function(username) {
+        msgService.listen("USER_LEFT", function(username) {
             $scope.cards = $scope.cards.filter(function(card) {
                 return card.user !== username;
             });
         });
-        message.listen("USER_JOINED", function(username) {
+        msgService.listen("USER_JOINED", function(username) {
             var card = {
                 user: username,
                 value: null
@@ -28,7 +27,7 @@
 
             $scope.cards.push(card);
         });
-        message.listen("USER_PICKED", function(data) {
+        msgService.listen("USER_PICKED", function(data) {
             var card = $scope.cards.find(function(card) {
                 return card.user === data.user;
             });
@@ -45,6 +44,11 @@
                 card.value = null;
             });
 
+            msgService.send({
+                type: "RESET",
+                message: ""
+            });
+
             checkStats();
         }
 
@@ -53,19 +57,19 @@
                 return card.value != null;
             });
 
-            if (done) {
-                var sum = $scope.cards.reduce(function(prev, curr) {
-                    if (isNaN(curr.value)) {
-                        return prev;
-                    } else {
-                        return prev + +curr.value;
-                    }
-                }, 0);
+            if (done && $scope.cards.length) {
+                var cardsWithNumberCount = $scope.cards
+                    .filter(function(card) {
+                        return !isNaN(card.value);
+                    })
+                    .length;
 
-                $scope.averageScore = (sum / $scope.cards.length) || 0;
+                if (cardsWithNumberCount >= 3) {
+                    
+                }
+
+
                 $scope.flip = true;
-
-                $rootScope.$apply();
             } else {
                 $scope.notChosenCount = $scope.cards
                     .filter(function(card) {

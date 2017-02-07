@@ -8,8 +8,8 @@
         ])
         .run(run);
 
-    run.$inject = ["$rootScope", "$cookies", "$location"];
-    function run($rootScope, $cookies, $location) {
+    run.$inject = ["$rootScope", "$cookies", "$location", "msgService"];
+    function run($rootScope, $cookies, $location, msgService) {
         $rootScope.newUser = {
             name: $cookies.get("username"),
             room: '',
@@ -30,6 +30,8 @@
                 publishKey: 'pub-c-69789d50-67b0-4cf4-80b6-368360332773',
                 subscribeKey: 'sub-c-82db2fb2-eca4-11e6-889b-02ee2ddab7fe'
             });
+
+            msgService.subscribe($rootScope.user.room);
             
             if (user.joinRoom) {
                 $location.path("/estimate");

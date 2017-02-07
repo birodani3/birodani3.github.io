@@ -3,11 +3,11 @@
 
     angular
         .module('estimate')
-        .factory('message', message);
+        .factory('msgService', msgService);
 
-    message.$inject = ["$rootScope"];
+    msgService.$inject = ["$rootScope"];
 
-    function message ($rootScope) {
+    function msgService ($rootScope) {
         return {
             subscribe: subscribe,
             send: send,
