@@ -56,7 +56,7 @@
                 type: "USER_LEFT",
                 message: $rootScope.user.name
             });
-            return true;
+            return false;
         }
         window.onbeforeunload = sendLeftMessage;
         $scope.$on("$destroy", sendLeftMessage);

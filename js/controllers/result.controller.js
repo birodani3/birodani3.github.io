@@ -58,22 +58,11 @@
             });
 
             if (done && $scope.cards.length) {
-                var cardsWithNumberCount = $scope.cards
-                    .filter(function(card) {
-                        return !isNaN(card.value);
-                    })
-                    .length;
-
-                if (cardsWithNumberCount >= 3) {
-                    
-                }
-
-
                 $scope.flip = true;
             } else {
                 $scope.notChosenCount = $scope.cards
                     .filter(function(card) {
-                        return !card.value;
+                        return card.value == null;
                     })
                     .length;
             }

@@ -13,6 +13,7 @@
 		<script src="/js/app.module.js"></script>
         <script src="/js/app.config.js"></script>
         <script src="/js/services/msg.service.js"></script>
+        <script src="/js/controllers/login.controller.js"></script>
         <script src="/js/controllers/result.controller.js"></script>
         <script src="/js/controllers/estimate.controller.js"></script>
         <script src="/js/components/card.component.js"></script>
@@ -23,7 +24,6 @@
                 <div class="navbar-header">
                     <span class="navbar-brand">Estimate</span>
                 </div>
-                <p class="navbar-text" ng-show="!!user">     </p>
                 <p class="navbar-text navbar-right" style="margin-right: 0" ng-show="!!user">{{user.name}} at room '{{user.room}}'     </p>
             </div>
         </nav>

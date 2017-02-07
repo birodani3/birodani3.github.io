@@ -11,7 +11,8 @@
         // Routes config
         $routeProvider
             .when('/login', {
-                templateUrl: '/templates/login.html'
+                templateUrl: '/templates/login.html',
+                controller: 'LoginController'
             })
             .when('/results', {
                 templateUrl: '/templates/result.html',
