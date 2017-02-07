@@ -30,6 +30,10 @@
         }
 
         function selectCard(value) {
+            if ($scope.selected) {
+                return;
+            }
+
             $scope.selectedValue = value;
             $scope.selected = true;
 
