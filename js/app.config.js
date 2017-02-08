@@ -5,9 +5,9 @@
         .module('estimate')
         .config(config);
 
-    config.$inject = ['$routeProvider'];
+    config.$inject = ['$routeProvider', 'toastrConfig'];
 
-    function config ($routeProvider) {
+    function config ($routeProvider, toastrConfig) {
         // Routes config
         $routeProvider
             .when('/login', {
@@ -32,6 +32,13 @@
                 redirectTo: '/login'
             });
 
+        // Toastr config
+        angular.extend(toastrConfig, {
+            newestOnTop: true,
+            maxOpened: 6,
+            target: '#main-view'
+        });
+
         function access ($rootScope, $location, $q) {
             var onChangeError = $rootScope.$on("$routeChangeError", function (event, current, previous, rejection) {
                 $location.path('/');
@@ -39,7 +46,7 @@
                 onChangeError();
             });
 
-            return $rootScope.user ? true : $q.reject('No country selected');
+            return $rootScope.user ? true : $q.reject();
         }
     }
 

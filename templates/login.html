@@ -1,11 +1,22 @@
 <div class="loginmodal-container">
-    <h1>Login</h1><br>
-    <form>
-        <input type="text" ng-model="newUser.name" placeholder="Username">
-        <span class="input-group-addon" id="create-room">Create</span>
-        <input type="text" class="form-control" placeholder="room" ng-change="newUser.joinRoom = ''" ng-model="newUser.newRoom" aria-describedby="create-room">
-        <span class="input-group-addon" id="join-room">Join</span>
-        <input type="text" class="form-control" placeholder="room" ng-change="newUser.newRoom = ''" ng-model="newUser.joinRoom" aria-describedby="join-room">
-        <input type="submit" name="login" class="login loginmodal-submit" ng-click="login(newUser)">
+    <h1>
+        <div class="btn btn-default pull-left" ng-show="state.main !== 'SELECT_MODE'" ng-click="changeMainState('SELECT_MODE')">←</div>
+        <span class="title">{{title}}<span>
+        <div class="btn btn-default pull-right" ng-show="state.join !== 'LOADING'" ng-click="changeJoinState('LOADING')">↻</div>
+    </h1><br>
+    <form ng-switch="state.main">
+        <div ng-switch-when="SELECT_MODE">
+            <div class="btn btn-primary btn-wide" ng-click="changeMainState('CREATE_ROOM')">Create room</div>
+            <div class="btn btn-primary btn-wide" ng-click="changeMainState('JOIN_ROOM')">Join room</div>
+        </div>
+        <div ng-switch-when="CREATE_ROOM">
+            <input type="text" class="form-control" placeholder="Name" ng-model="roomName">
+            <div class="btn btn-primary btn-wide" ng-click="createRoom(roomName)">Create</div>
+        </div>
+        <div ng-switch-when="JOIN_ROOM">
+            <input type="text" class="form-control" placeholder="Username" ng-model="userName">
+            <div class="btn btn-primary btn-wide" ng-repeat="room in rooms" ng-click="joinRoom(userName, room)">{{room}}</div>
+            <div class="text-center" ng-show="state.join === 'ROOMS_NOT_FOUND'">No rooms available</div>
+        </div>
     </form>
 </div>

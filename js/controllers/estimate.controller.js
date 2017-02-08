@@ -15,12 +15,11 @@
 
         //////////////////////////////////////////////////////////////
 
+        msgService.listen("RESET", reset);
         msgService.send({
             type: "USER_JOINED",
-            message: $rootScope.user.name
+            message: $rootScope.user
         });
-
-        msgService.listen("RESET", reset);
 
         function reset() {
             $scope.selectedValue = null;
@@ -41,7 +40,7 @@
                 type: "USER_PICKED",
                 message: {
                     value: value,
-                    user: $rootScope.user.name
+                    uuid: $rootScope.user.uuid
                 }
             });
         }
@@ -49,17 +48,6 @@
         function isSelected(value) {
             return $scope.selectedValue === value;
         }
-
-
-        function sendLeftMessage() {
-            msgService.send({
-                type: "USER_LEFT",
-                message: $rootScope.user.name
-            });
-            return false;
-        }
-        window.onbeforeunload = sendLeftMessage;
-        $scope.$on("$destroy", sendLeftMessage);
     }
 
 }());
