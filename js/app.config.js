@@ -36,7 +36,7 @@
         angular.extend(toastrConfig, {
             newestOnTop: true,
             maxOpened: 6,
-            target: '#main-view'
+            target: 'body'
         });
 
         function access ($rootScope, $location, $q) {

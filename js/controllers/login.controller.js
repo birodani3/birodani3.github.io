@@ -10,46 +10,47 @@
     function LoginController ($rootScope, $scope, $cookies, $location, toastr, msgService) {
         $rootScope.user = null;
         $scope.title = "Estimation";
-        msgService.unsubscribe();
 
-        var states = {
+        $scope.states = {
             "SELECT_MODE": "SELECT_MODE",
             "CREATE_ROOM": "CREATE_ROOM",
             "JOIN_ROOM": "JOIN_ROOM",
             "LOADING": "LOADING",
             "ROOMS_FOUND": "ROOMS_FOUND",
             "ROOMS_NOT_FOUND": "ROOMS_NOT_FOUND"
-        }
+        };
 
         $scope.changeMainState = changeMainState;
         $scope.changeJoinState = changeJoinState;
         $scope.createRoom = createRoom;
         $scope.joinRoom = joinRoom;
         $scope.state = {
-            main: states.SELECT_MODE,
-            join: states.LOADING
-        }
+            main: $scope.states.SELECT_MODE,
+            join: $scope.states.LOADING
+        };
 
         ///////////////////////////////////////////////////////////////////////////
+
+        msgService.unsubscribe();
+
         function changeMainState(newState) {
             $scope.state.main = newState;
 
             switch(newState) {
-                case states.SELECT_MODE: 
-                    $scope.state.join = states.LOADING;
+                case $scope.states.SELECT_MODE:
+                    $scope.state.join = $scope.states.LOADING;
                     $scope.title = "Estimation";
                     $scope.roomName = "";
                     $scope.userName = "";
                     $scope.rooms = [];
                     break;
                 
-                case states.CREATE_ROOM:
+                case $scope.states.CREATE_ROOM:
                     $scope.title = "Create room";
                     $scope.roomName = $cookies.get("roomname");
-                    getRooms();
                     break;
                 
-                case states.JOIN_ROOM:
+                case $scope.states.JOIN_ROOM:
                     $scope.title = "Join room";
                     $scope.userName = $cookies.get("username");
                     getRooms();
@@ -61,20 +62,20 @@
             $scope.state.join = newState;
 
             switch(newState) {
-                case states.LOADING:
+                case $scope.states.LOADING:
                     $scope.rooms = [];
                     getRooms();
                     break;
 
-                case states.ROOMS_NOT_FOUND:
+                case $scope.states.ROOMS_NOT_FOUND:
                     break;
                 
-                case states.ROOMS_FOUND:
+                case $scope.states.ROOMS_FOUND:
                     break;
             }
         }
 
-        function getRooms() {
+        function getRooms(callback) {
             // TODO remove this somehow
             msgService.init({ room: "_BLANK" });
             msgService.hereNow(function(status, data) {
@@ -83,12 +84,14 @@
                 });
 
                 if ($scope.rooms.length) {
-                    changeJoinState(states.ROOMS_FOUND);
+                    changeJoinState($scope.states.ROOMS_FOUND);
                 } else {
-                    changeJoinState(states.ROOMS_NOT_FOUND);
+                    changeJoinState($scope.states.ROOMS_NOT_FOUND);
                 }
 
                 $rootScope.$$phase || $rootScope.$apply();
+
+                callback && callback();
             });
         }
 
@@ -96,17 +99,22 @@
             roomName = roomName.trim();
 
             if (roomName) {
-                if ($scope.rooms.includes(roomName)) {
-                    toastr.error("A room with this name already exists.", "Error");
-                    return;
-                }
+                toastr.info("Checking room availability...", "Info");
 
-                var user = { room: roomName };
-                $rootScope.user = user;
-                msgService.init(user);
+                getRooms(function() {
+                    if ($scope.rooms.includes(roomName)) {
+                        toastr.error("Room '" + roomName + "' already exists.", "Error");
+                        return;
+                    }
 
-                $cookies.put("roomname", roomName);
-                $location.path("/results");
+                    var user = { room: roomName };
+                    $rootScope.user = user;
+                    msgService.init(user);
+
+                    $cookies.put("roomname", roomName);
+                    $location.path("/results");
+                    toastr.success("Room '" + roomName + "' created", "Success");
+                });
             } else {
                 toastr.error("Please add a name to your room.", "Error");
             }

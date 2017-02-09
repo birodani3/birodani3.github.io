@@ -1,8 +1,8 @@
 <div class="loginmodal-container">
     <h1>
-        <div class="btn btn-default pull-left" ng-show="state.main !== 'SELECT_MODE'" ng-click="changeMainState('SELECT_MODE')">←</div>
-        <span class="title">{{title}}<span>
-        <div class="btn btn-default pull-right" ng-show="state.join !== 'LOADING'" ng-click="changeJoinState('LOADING')">↻</div>
+        <div class="btn btn-default btn-left" ng-show="state.main !== states.SELECT_MODE" ng-click="changeMainState('SELECT_MODE')">←</div>
+        <span class="title">{{title}}</span>
+        <div class="btn btn-default btn-right" ng-show="state.main === states.JOIN_ROOM && state.join !== states.LOADING" ng-click="changeJoinState('LOADING')">↻</div>
     </h1><br>
     <form ng-switch="state.main">
         <div ng-switch-when="SELECT_MODE">
@@ -14,9 +14,9 @@
             <div class="btn btn-primary btn-wide" ng-click="createRoom(roomName)">Create</div>
         </div>
         <div ng-switch-when="JOIN_ROOM">
-            <input type="text" class="form-control" placeholder="Username" ng-model="userName">
+            <input type="text" class="form-control" placeholder="Username" ng-init="userName = ''" ng-model="userName">
             <div class="btn btn-primary btn-wide" ng-repeat="room in rooms" ng-click="joinRoom(userName, room)">{{room}}</div>
-            <div class="text-center" ng-show="state.join === 'ROOMS_NOT_FOUND'">No rooms available</div>
+            <div class="text-center room-message" ng-show="state.join === states.ROOMS_NOT_FOUND">No rooms available</div>
         </div>
     </form>
 </div>
