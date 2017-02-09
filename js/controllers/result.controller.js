@@ -27,7 +27,7 @@
 
             $scope.cards = $scope.cards.filter(function(card) {
                 if (card.uuid === data.uuid) {
-                    user = card.name;
+                    username = card.name;
                     return false;
                 }
 
