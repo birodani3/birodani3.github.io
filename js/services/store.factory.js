@@ -42,6 +42,9 @@
             // Returns settings
             getSettings: getSettings,
 
+            // Set the settings
+            setSettings: setSettings,
+
             // Sets the user's given properties (other properties will not change!)
             setUser: setUser,
 
@@ -73,11 +76,15 @@
         }
 
         function getSettings() {
-            return store.settings;
+            return angular.copy(store.settings);
         }
 
         function getUser() {
             return store.user;
+        }
+
+        function setSettings(settings) {
+            store.settings = settings;
         }
 
         function setUser(user) {

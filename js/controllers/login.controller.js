@@ -18,7 +18,8 @@
         $scope.isLoading = false;
         $scope.state = $scope.states.SELECT_MODE;
         $scope.title = "Estimation";
-        $scope.settings = store.getSettings();
+        $scope.defaultSettings = store.getSettings();
+        $scope.settings = getSettingsFromCookie() || store.getSettings();
         
         msgService.unsubscribe();
         store.setUser({ name: null, channel: null, isHost: false });
@@ -120,9 +121,26 @@
             }
         }
 
-        $scope.$on("destroy", function() {
+        $scope.saveSettingsToCookie = function() {
+            $cookies.put("settings", JSON.stringify($scope.settings));
+        }
+
+        $scope.loadDefaultSettings = function() {
+            _.forIn($scope.defaultSettings, function(value, key) {
+                $scope.settings[key] = angular.copy(value);
+            });
+        }
+
+        $scope.$on("$destroy", function() {
+            store.setSettings($scope.settings);
             store.unsubscribe(onUserChanged);
         });
+
+        function getSettingsFromCookie() {
+            var settingsString = $cookies.get("settings");
+
+            return settingsString ? JSON.parse(settingsString) : null;
+        }
 
         function onUserChanged(user) {
             if (!user.uuid) {

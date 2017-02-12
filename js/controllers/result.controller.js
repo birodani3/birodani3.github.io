@@ -10,7 +10,6 @@
     function ResultController ($rootScope, $scope, $timeout, toastr, _, store, msgService) {
         $scope.settings = store.getSettings();
         $scope.canUndo = $scope.settings.undo;
-        $scope.cardColor = $scope.settings.color;
         $scope.flip = false;
         $scope.cards = [];
 
@@ -36,8 +35,6 @@
             });
 
             $scope.canUndo = $scope.settings.undo;
-
-            
             $scope.flip = false;
         }
 

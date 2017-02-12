@@ -96,8 +96,8 @@ nav.navbar .container-fluid .btn {
   width: 100% !important;
 }
 .loginmodal-container h1 {
-  font-size: 1.8em;
   text-align: center;
+  margin-top: 40px;
 }
 .loginmodal-container input[type=submit] {
   display: block;
@@ -165,6 +165,15 @@ nav.navbar .container-fluid .btn {
 }
 .loginmodal-container .values-container label {
   width: 52px;
+}
+.loginmodal-container .button-container div {
+  width: 210px;
+}
+.loginmodal-container .button-container div:nth-child(1) {
+  float: left;
+}
+.loginmodal-container .button-container div:nth-child(2) {
+  float: right;
 }
 input[type=password] {
   -moz-box-sizing: border-box;
