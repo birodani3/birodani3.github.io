@@ -61,7 +61,7 @@ header {
 
 div[ng-view] {
 	background-color: @color0;
-	height: calc(100% - 72px);
+	height: ~"calc(100% - 72px)";
 }
 
 label {
@@ -269,55 +269,80 @@ input[type=password] {
 	display: inline-block;
 }
 
-.card-container {
-	border-radius: 5px;
-	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-	float: left;
-	height: 300px;
-	margin: 10px;
-	transition: 0.3s;
-	width: 200px;
+.result-container {
+	perspective: 1000px;
+	transform-style: preserve-3d;
 
-	&:hover {
-		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-	}
+	&.flip .card-container {
+		.front {
+			transform: rotateY(180deg);
+		}
 
-	.card-placeholder {
-		color: @color0;
-		display: table;
-		font-size: 72px;
-		font-weight: bold;
-		height: 80%;
-		text-align: center;
-		width: 100%;
-	}
-
-	.card-value {
-		color: @color0;
-		display: table;
-		font-size: 72px;
-		font-weight: bold;
-		height: 80%;
-		text-align: center;
-		width: 100%;
-
-		span {
-			display: table-cell;
-			font-size: 126px;
-			vertical-align: middle;
+		.back {
+			transform: rotateY(0deg);
 		}
 	}
 
-	.card-placeholder>span {
-		display: table-cell;
-		vertical-align: middle;
+	.card-container {
+		height: 300px;
+		margin: 10px;
+		width: 200px;
+		float: left;
+		position: relative;
 	}
 
-	.user-name {
-		font-weight: bold;
-		height: 20%;
-		padding: 10% 0;
-		text-align: center;
+	.front,
+	.back {
+		width: 100%;
+		height: 100%;
+		border-radius: 5px;
+		box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+		backface-visibility: hidden;
+		transition: 0s;
+		transform-style: preserve-3d;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		&:hover {
+			box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+		}
+
+		.card-value {
+			color: @color0;
+			border-radius: 5px 5px 0 0;
+			display: table;
+			font-size: 72px;
+			font-weight: bold;
+			height: 80%;
+			text-align: center;
+			width: 100%;
+		}
+		
+		.card-value > span {
+			display: table-cell;
+			vertical-align: middle;
+		}
+
+		.user-name {
+			font-weight: bold;
+			height: 20%;
+			padding: 10% 0;
+			text-align: center;
+		}
+	}
+
+	.front {
+		z-index: 2;
+		transform: rotateY(0deg);
+	}
+
+	.back {
+		transform: rotateY(-180deg);
+
+		span {
+			font-size: 126px;
+		}
 	}
 }
 

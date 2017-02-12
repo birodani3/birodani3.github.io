@@ -15,6 +15,7 @@
             settings: {
                 undo: true,
                 showName: true,
+                animation: true,
                 color: "#2670e0",
                 values: {
                     0: true, 1: true, 2: true, 3: true, 5: true, 8: true,

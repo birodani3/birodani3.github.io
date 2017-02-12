@@ -50,7 +50,7 @@ header {
 }
 div[ng-view] {
   background-color: #f2f2f2;
-  height: calc(28%);
+  height: calc(100% - 72px);
 }
 label {
   font-weight: normal;
@@ -219,20 +219,44 @@ input[type=password]:hover {
 .result-buttons > div {
   display: inline-block;
 }
-.card-container {
-  border-radius: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  float: left;
+.result-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.result-container.flip .card-container .front {
+  transform: rotateY(180deg);
+}
+.result-container.flip .card-container .back {
+  transform: rotateY(0deg);
+}
+.result-container .card-container {
   height: 300px;
   margin: 10px;
-  transition: 0.3s;
   width: 200px;
+  float: left;
+  position: relative;
 }
-.card-container:hover {
+.result-container .front,
+.result-container .back {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  backface-visibility: hidden;
+  transition: 0s;
+  transform-style: preserve-3d;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.result-container .front:hover,
+.result-container .back:hover {
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
-.card-container .card-placeholder {
+.result-container .front .card-value,
+.result-container .back .card-value {
   color: #f2f2f2;
+  border-radius: 5px 5px 0 0;
   display: table;
   font-size: 72px;
   font-weight: bold;
@@ -240,29 +264,27 @@ input[type=password]:hover {
   text-align: center;
   width: 100%;
 }
-.card-container .card-value {
-  color: #f2f2f2;
-  display: table;
-  font-size: 72px;
-  font-weight: bold;
-  height: 80%;
-  text-align: center;
-  width: 100%;
-}
-.card-container .card-value span {
-  display: table-cell;
-  font-size: 126px;
-  vertical-align: middle;
-}
-.card-container .card-placeholder > span {
+.result-container .front .card-value > span,
+.result-container .back .card-value > span {
   display: table-cell;
   vertical-align: middle;
 }
-.card-container .user-name {
+.result-container .front .user-name,
+.result-container .back .user-name {
   font-weight: bold;
   height: 20%;
   padding: 10% 0;
   text-align: center;
+}
+.result-container .front {
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+.result-container .back {
+  transform: rotateY(-180deg);
+}
+.result-container .back span {
+  font-size: 126px;
 }
 .card-pick-container {
   padding: 6px;
