@@ -5,9 +5,9 @@
         .module('estimate')
         .controller('EstimateController', EstimateController);
 
-    EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'store', 'msgService'];
+    EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'store', 'msgService'];
 
-    function EstimateController ($rootScope, $scope, $timeout, store, msgService) {
+    function EstimateController ($rootScope, $scope, $timeout, toastr, store, msgService) {
         $scope.selected = false;
         $scope.undoEnabled = true;
         $scope.settings = {
@@ -19,6 +19,7 @@
 
         msgService.listen("RESET", reset);
         msgService.listen("SETTINGS", saveSettings);
+        msgService.listenPresence(["leave", "timeout"], onUserLeft);
         msgService.send({
             type: "USER_JOINED",
             message: store.getUser()
@@ -74,9 +75,19 @@
 
         function saveSettings(data) {
             if (data.uuid === store.getUser().uuid) {
+                $scope.hostUuid = data.hostUuid;
                 $scope.settings = data.settings;
                 $scope.undoEnabled = $scope.settings.undo;
 
+                $rootScope.$apply();
+            }
+        }
+
+        function onUserLeft(data) {
+            // The channel host left the channel, time to leave
+            if (data.uuid === $scope.hostUuid) {
+                toastr.warning("Channel host left. Leaving channel.", "Warning");
+                $scope.leaveChannel();
                 $rootScope.$apply();
             }
         }

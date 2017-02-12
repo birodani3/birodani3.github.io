@@ -136,6 +136,7 @@
                 type: "SETTINGS",
                 message: {
                     uuid: user.uuid,
+                    hostUuid: store.getUser().uuid,
                     settings: settingsToSend
                 }
             });
