@@ -9,6 +9,10 @@
 	font-size: 52px;
 }
 
+hr {
+	border-color: @color3;
+}
+
 .btn-wide {
 	font-size: 46px;
 	margin: 4px 0;
@@ -62,6 +66,7 @@ div[ng-view] {
 
 label {
 	font-weight: normal;
+	user-select: none;
 }
 
 form {
@@ -151,6 +156,7 @@ nav.navbar {
 	}
 
 	.channel-message {
+        padding-top: 15px;
 		font-size: 26px;
 	}
 
@@ -182,6 +188,24 @@ nav.navbar {
 
 	.radio+.radio {
 		margin-top: 0px;
+	}
+
+	.values-container {
+		.values-label {
+			float: left;
+		}
+
+		.checkbox-container {
+			float: left;
+
+			.checkbox {
+				display: inline-block;
+			}
+		}
+
+		label {
+			width: 52px;
+		}
 	}
 }
 

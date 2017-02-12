@@ -9,10 +9,10 @@
 
     function EstimateController ($rootScope, $scope, $timeout, store, msgService) {
         $scope.selected = false;
-        $scope.values = [0, 1, 2, 3, 5, 8, 13, 20, 40, "∞", "?"];
         $scope.undoEnabled = true;
         $scope.settings = {
-            undo: true
+            undo: true,
+            values: []
         };
 
         //////////////////////////////////////////////////////////////

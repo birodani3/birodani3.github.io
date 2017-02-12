@@ -27,6 +27,16 @@
                 <label for="color-input">Card color</label>
                 <input class="form-control color-input" type="color" ng-model="settings.color" id="color-input">
             </div>
+            <hr>
+            <div class="values-container">
+                <label class="values-label">Values</label>
+                <div class="checkbox-container">
+                    <div class="checkbox checkbox-primary" ng-repeat="(value, isActive) in settings.values">
+                        <input type="checkbox" id="value-{{$index}}-checkbox" ng-model="settings.values[value]">
+                        <label for="value-{{$index}}-checkbox">{{value}}</label>
+                    </div>
+                </div>
+            </div>
         </div>
         <div ng-switch-when="CREATE_CHANNEL">
             <div class="input-group">

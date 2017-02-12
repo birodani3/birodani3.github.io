@@ -8,8 +8,10 @@
     ResultController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'lodash', 'store', 'msgService'];
 
     function ResultController ($rootScope, $scope, $timeout, toastr, _, store, msgService) {
-        $scope.canUndo = store.getSettings().undo;
-        $scope.cardColor = store.getSettings().color;
+        var settings = store.getSettings();
+
+        $scope.canUndo = settings.undo;
+        $scope.cardColor = settings.color;
         $scope.flip = false;
         $scope.cards = [];
 
@@ -34,6 +36,7 @@
                 }
             });
 
+            $scope.canUndo = settings.undo;
             $scope.flip = false;
         }
 
@@ -51,7 +54,7 @@
 
         function onUserJoined(user) {
             var card = {
-                name: store.getSettings().showName ? user.name : "<hidden>",
+                name: settings.showName ? user.name : "<hidden>",
                 uuid: user.uuid,
                 value: null
             };
@@ -118,11 +121,21 @@
         }
 
         function sendSettingsToUser(user) {
+            var settingsToSend = angular.copy(settings);
+            // Only the accepted values are sent as an array
+            settingsToSend.values = _.reduce(settingsToSend.values, function(result, value, key) {
+                if (value) {
+                    result.push(key);
+                }
+
+                return result;
+            }, []);
+
             msgService.send({
                 type: "SETTINGS",
                 message: {
                     uuid: user.uuid,
-                    settings: store.getSettings()
+                    settings: settingsToSend
                 }
             });
         }

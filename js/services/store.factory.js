@@ -15,7 +15,11 @@
             settings: {
                 undo: true,
                 showName: true,
-                color: "#2670e0"
+                color: "#2670e0",
+                values: {
+                    0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
+                    13: true, 20: true, 40: true, "∞": true, "?": true
+                }
             },
             user: {
                 uuid: null,
@@ -30,6 +34,9 @@
             // Callback gets called with the updated value only (no oldVal as in angular)
             // Callback gets called once immediately after subscribing!
             subscribe: subscribe,
+
+            // Unsubscribe from store changes
+            unsubscribe: unsubscribe,
 
             // Returns settings
             getSettings: getSettings,
