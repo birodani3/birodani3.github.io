@@ -112,6 +112,8 @@
                 } else {
                     $scope.flip = true;
                 }
+            } else {
+                $scope.flip = false;
             }
         }
 
