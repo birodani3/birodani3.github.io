@@ -45,7 +45,7 @@
                     if ($scope.selected) {
                         $scope.undoEnabled = false;
                     }
-                }, 40000000);
+                }, 4000);
             }
         }
 
