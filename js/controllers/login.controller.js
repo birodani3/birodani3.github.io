@@ -5,135 +5,128 @@
         .module('estimate')
         .controller('LoginController', LoginController);
 
-    LoginController.$inject = ['$rootScope', '$scope', '$cookies', '$location', 'toastr', 'msgService'];
+    LoginController.$inject = ['$rootScope', '$scope', '$cookies', '$location', 'lodash', 'toastr', 'store', 'msgService'];
 
-    function LoginController ($rootScope, $scope, $cookies, $location, toastr, msgService) {
-        $rootScope.user = null;
-        $scope.title = "Estimation";
-
+    function LoginController ($rootScope, $scope, $cookies, $location, _, toastr, store, msgService) {
         $scope.states = {
             "SELECT_MODE": "SELECT_MODE",
-            "CREATE_ROOM": "CREATE_ROOM",
-            "JOIN_ROOM": "JOIN_ROOM",
-            "LOADING": "LOADING",
-            "ROOMS_FOUND": "ROOMS_FOUND",
-            "ROOMS_NOT_FOUND": "ROOMS_NOT_FOUND"
+            "CREATE_CHANNEL": "CREATE_CHANNEL",
+            "JOIN_CHANNEL": "JOIN_CHANNEL",
+            "SETTINGS": "SETTINGS"
         };
 
-        $scope.changeMainState = changeMainState;
-        $scope.changeJoinState = changeJoinState;
-        $scope.createRoom = createRoom;
-        $scope.joinRoom = joinRoom;
-        $scope.state = {
-            main: $scope.states.SELECT_MODE,
-            join: $scope.states.LOADING
-        };
-
-        ///////////////////////////////////////////////////////////////////////////
-
+        $scope.isLoading = false;
+        $scope.state = $scope.states.SELECT_MODE;
+        $scope.title = "Estimation";
+        $scope.settings = store.getSettings();
+        
         msgService.unsubscribe();
-
-        function changeMainState(newState) {
-            $scope.state.main = newState;
+        store.setUser({ name: null, channel: null, isHost: false });
+        store.subscribe("user", onUserChanged);
+        
+        $scope.changeState = function(newState) {
+            $scope.state = newState;
 
             switch(newState) {
                 case $scope.states.SELECT_MODE:
-                    $scope.state.join = $scope.states.LOADING;
                     $scope.title = "Estimation";
-                    $scope.roomName = "";
+                    $scope.channel = "";
                     $scope.userName = "";
-                    $scope.rooms = [];
+                    $scope.channels = [];
+                    break;
+
+                case $scope.states.CREATE_CHANNEL:
+                    $scope.title = "Create channel";
+                    $scope.channel = $cookies.get("channel") || "";
+                    break;
+
+                case $scope.states.SETTINGS:
+                    $scope.title = "Settings"
                     break;
                 
-                case $scope.states.CREATE_ROOM:
-                    $scope.title = "Create room";
-                    $scope.roomName = $cookies.get("roomname");
-                    break;
-                
-                case $scope.states.JOIN_ROOM:
-                    $scope.title = "Join room";
-                    $scope.userName = $cookies.get("username");
-                    getRooms();
+                case $scope.states.JOIN_CHANNEL:
+                    $scope.title = "Join channel";
+                    $scope.userName = $cookies.get("username") || "";
+                    $scope.loadChannels();
                     break;
             }
         }
 
-        function changeJoinState(newState) {
-            $scope.state.join = newState;
-
-            switch(newState) {
-                case $scope.states.LOADING:
-                    $scope.rooms = [];
-                    getRooms();
+        $scope.back = function() {
+            switch($scope.state) {
+                case $scope.states.CREATE_CHANNEL:
+                case $scope.states.JOIN_CHANNEL:
+                default:
+                    $scope.changeState($scope.states.SELECT_MODE);
                     break;
 
-                case $scope.states.ROOMS_NOT_FOUND:
-                    break;
-                
-                case $scope.states.ROOMS_FOUND:
+                case $scope.states.SETTINGS:
+                    $scope.changeState($scope.states.CREATE_CHANNEL);
                     break;
             }
         }
 
-        function getRooms(callback) {
-            // TODO remove this somehow
-            msgService.init({ room: "_BLANK" });
+        $scope.loadChannels = function(callback) {
+            callback = callback || _.noop;
+
+            $scope.isLoading = true;
+            $scope.channels = [];
+
             msgService.hereNow(function(status, data) {
-                $scope.rooms = Object.keys(data.channels).filter(function(roomName) {
-                    return roomName !== "_BLANK";
-                });
+                $scope.channels = _.keys(data.channels);
+                $scope.isLoading = false;
 
-                if ($scope.rooms.length) {
-                    changeJoinState($scope.states.ROOMS_FOUND);
-                } else {
-                    changeJoinState($scope.states.ROOMS_NOT_FOUND);
-                }
-
-                $rootScope.$$phase || $rootScope.$apply();
-
-                callback && callback();
+                $rootScope.$apply(callback);
             });
         }
 
-        function createRoom(roomName) {
-            roomName = roomName.trim();
+        $scope.createChannel = function(channel) {
+            channel = channel.trim();
 
-            if (roomName) {
-                toastr.info("Checking room availability...", "Info");
+            if (channel) {
+                toastr.info("Checking channel availability...", "Info");
 
-                getRooms(function() {
-                    if ($scope.rooms.includes(roomName)) {
-                        toastr.error("Room '" + roomName + "' already exists.", "Error");
+                $scope.loadChannels(function() {
+                    if (_.includes($scope.channels, channel)) {
+                        toastr.error("Channel '" + channel + "' already exists.", "Error");
                         return;
                     }
 
-                    var user = { room: roomName };
-                    $rootScope.user = user;
-                    msgService.init(user);
-
-                    $cookies.put("roomname", roomName);
+                    msgService.subscribe(channel);
+                    store.setUser({ name: name, channel: channel });
+                    toastr.success("Channel '" + channel + "' created", "Success");
+                    $cookies.put("channel", channel);
                     $location.path("/results");
-                    toastr.success("Room '" + roomName + "' created", "Success");
                 });
             } else {
-                toastr.error("Please add a name to your room.", "Error");
+                toastr.error("Please add a name to your channel.", "Error");
             }
         }
 
-        function joinRoom(userName, roomName) {
+        $scope.joinChannel = function(userName, channel) {
             userName = userName.trim();
-            roomName = roomName.trim();
+            channel = channel.trim();
 
-            if (userName && roomName) {
-                var user = { name: userName, room: roomName};
-                $rootScope.user = user;
+            if (userName && channel) {
+                store.setUser({ channel: channel, name: userName });
+                msgService.subscribe(channel);
 
-                msgService.init(user);
-                $cookies.put("roomname", roomName);
+                $cookies.put("channel", channel);
                 $cookies.put("username", userName);
+
                 $location.path("/estimate");
             } else {
                 toastr.error("Please add a username.", "Error");
+            }
+        }
+
+        $scope.$on("destroy", function() {
+            store.unsubscribe(onUserChanged);
+        });
+
+        function onUserChanged(user) {
+            if (!user.uuid) {
+                msgService.init();
             }
         }
     }

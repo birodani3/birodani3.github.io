@@ -1,22 +1,47 @@
 <div class="loginmodal-container">
-    <h1>
-        <div class="btn btn-default btn-left" ng-show="state.main !== states.SELECT_MODE" ng-click="changeMainState('SELECT_MODE')">←</div>
-        <span class="title">{{title}}</span>
-        <div class="btn btn-default btn-right" ng-show="state.main === states.JOIN_ROOM && state.join !== states.LOADING" ng-click="changeJoinState('LOADING')">↻</div>
-    </h1><br>
-    <form ng-switch="state.main">
+    <div class="btn btn-default btn-left" ng-show="state !== states.SELECT_MODE" ng-click="back()">
+        <i class="fa fa-arrow-left"></i>
+    </div>
+    <div class="btn btn-default btn-right" ng-class="{ 'disabled': isLoading }" ng-show="state === states.JOIN_CHANNEL" ng-click="isLoading || loadChannels()">
+        <i class="fa fa-refresh" ng-class="{ 'fa-spin': isLoading }"></i>
+    </div>
+    <div class="btn btn-default btn-right" ng-show="state === states.CREATE_CHANNEL" ng-click="changeState(states.SETTINGS)">
+        <i class="fa fa-cog"></i>
+    </div>
+    <h1><span class="title">{{title}}</span></h1><br>
+    <form ng-switch="state">
         <div ng-switch-when="SELECT_MODE">
-            <div class="btn btn-primary btn-wide" ng-click="changeMainState('CREATE_ROOM')">Create room</div>
-            <div class="btn btn-primary btn-wide" ng-click="changeMainState('JOIN_ROOM')">Join room</div>
+            <div class="btn btn-primary btn-wide" ng-click="changeState(states.CREATE_CHANNEL)">Create channel</div>
+            <div class="btn btn-primary btn-wide" ng-click="changeState(states.JOIN_CHANNEL)">Join channel</div>
         </div>
-        <div ng-switch-when="CREATE_ROOM">
-            <input type="text" class="form-control" placeholder="Name" ng-model="roomName">
-            <div class="btn btn-primary btn-wide" ng-click="createRoom(roomName)">Create</div>
+        <div ng-switch-when="SETTINGS">
+            <div class="checkbox checkbox-primary">
+                <input type="checkbox" id="undo-checkbox" ng-model="settings.undo">
+                <label for="undo-checkbox">Clients can UNDO estimations</label>
+            </div>
+            <div class="checkbox checkbox-primary">
+                <input type="checkbox" id="name-checkbox" ng-model="settings.showName">
+                <label for="name-checkbox">Show names</label>
+            </div>
+            <div class="form-group">
+                <label for="color-input">Card color</label>
+                <input class="form-control color-input" type="color" ng-model="settings.color" id="color-input">
+            </div>
         </div>
-        <div ng-switch-when="JOIN_ROOM">
-            <input type="text" class="form-control" placeholder="Username" ng-init="userName = ''" ng-model="userName">
-            <div class="btn btn-primary btn-wide" ng-repeat="room in rooms" ng-click="joinRoom(userName, room)">{{room}}</div>
-            <div class="text-center room-message" ng-show="state.join === states.ROOMS_NOT_FOUND">No rooms available</div>
+        <div ng-switch-when="CREATE_CHANNEL">
+            <div class="input-group">
+                <span class="input-group-addon" id="channel-addon">Channel name</span>
+                <input type="text" class="form-control" ng-model="channel" aria-describedby="channel-addon">
+            </div>
+            <div class="btn btn-primary btn-wide" ng-click="createChannel(channel)">Create</div>
+        </div>
+        <div ng-switch-when="JOIN_CHANNEL">
+            <div class="input-group">
+                <span class="input-group-addon" id="username-addon">Username</span>
+                <input type="text" class="form-control" ng-model="userName" aria-describedby="username-addon">
+            </div>
+            <div class="btn btn-primary btn-wide" ng-repeat="channel in channels" ng-click="joinChannel(userName, channel)">{{channel}}</div>
+            <div class="text-center channel-message" ng-show="!channels.length && !isLoading">No channels available</div>
         </div>
     </form>
 </div>

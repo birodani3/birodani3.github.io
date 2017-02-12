@@ -5,26 +5,25 @@
         .module('estimate')
         .controller('MainController', MainController);
 
-    MainController.$inject = ['$rootScope', '$scope', '$cookies', '$location', 'toastr', 'msgService'];
+    MainController.$inject = ['$rootScope', '$scope', '$location', 'store'];
 
-    function MainController ($rootScope, $scope, $cookies, $location, toastr, msgService) {
+    function MainController ($rootScope, $scope, $location, store) {
+        $scope.user = null;
 
-        $scope.leaveRoom = leaveRoom;
-        $scope.isLoggedIn = isLoggedIn;
-        $scope.isHost = isHost;
+        store.subscribe("user", function(user) {
+            $scope.user = user;
+        });
 
-        ///////////////////////////////////////////////////////////////////////////
-
-        function isHost() {
-            return $rootScope.user && $rootScope.user.isHost;
+        $scope.hasChannel = function() {
+            return $scope.user.channel;
         }
 
-        function isLoggedIn() {
-            return !!$rootScope.user;
-        }
-
-        function leaveRoom() {
+        $scope.leaveChannel = function() {
             $location.path("/login");
+        }
+
+        $scope.isHost = function() {
+            return $scope.user.isHost;
         }
     }
 

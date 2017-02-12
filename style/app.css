@@ -10,6 +10,35 @@
     font-size: 46px;
 }
 
+.disabled {
+    cursor: not-allowed;
+}
+
+@keyframes blink {
+    0%   { opacity: .2; }
+    20%  { opacity:  1; }
+    100% { opacity: .2; }
+}
+
+.dots {
+    margin: 50px 0;
+}
+
+.dots span {
+    animation-name: blink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+.dots span:nth-child(2) {
+    animation-delay: .2s;
+}
+
+.dots span:nth-child(3) {
+    animation-delay: .4s;
+}
+
 /* ---------------------------------------------------------- MAIN ---------------------------------------------------------- */
 
 html, body {
@@ -26,6 +55,14 @@ header {
 div[ng-view] {
     height: calc(100% - 72px);
     background-color: #f2f2f2;
+}
+
+label {
+    font-weight: normal;
+}
+
+form {
+    margin-bottom: 0;
 }
 
 /* ---------------------------------------------------------- NAV ---------------------------------------------------------- */
@@ -88,11 +125,15 @@ nav.navbar .container-fluid .btn {
     position: relative;
 }
 
+.loginmodal-container .input-group {
+    margin-bottom: 10px;
+}
+
+
 .loginmodal-container input[type=text], input[type=password] {
     height: 44px;
     font-size: 16px;
     width: 100%;
-    margin-bottom: 10px;
     -webkit-appearance: none;
     background: #fff;
     border: 1px solid #d9d9d9;
@@ -111,7 +152,7 @@ nav.navbar .container-fluid .btn {
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.loginmodal-container .room-message {
+.loginmodal-container .channel-message {
     font-size: 26px;
 }
 
@@ -125,6 +166,7 @@ nav.navbar .container-fluid .btn {
     position: absolute;
     right: 0;
     margin-right: 30px;
+    font-size: 16px;
 }
 
 .loginmodal {
@@ -152,12 +194,27 @@ nav.navbar .container-fluid .btn {
     background-color: #357ae8;
 }
 
+.loginmodal-container .color-input {
+    width: 40px;
+    height: 20px;
+    padding: 0;
+    display: inline-block;
+}
+
+.loginmodal-container .form-group label {
+    padding-left: 26px;
+}
+
+.loginmodal-container .radio + .radio, .checkbox + .checkbox {
+    margin-top: 0px;
+}
+
 /* ---------------------------------------------------------- BUTTONS ---------------------------------------------------------- */
 
 .result-buttons {
     width: 100%;
-    height: 94px;
-    padding: 30px;
+    height: 45px;
+    padding: 10px;
     font-size: 38px;
 }
 
@@ -183,25 +240,24 @@ nav.navbar .container-fluid .btn {
 
 .card-container .card-placeholder,
 .card-container .card-value {
+    width: 100%;
     height: 80%;
-    padding: 30% 0;
+    display: table;
     text-align: center;
     font-size: 72px;
     font-weight: bold;
-    background-color: #2670e0;
+    color: #f2f2f2;
 }
 
-.card-container .card-value.highest {
-    background-color: #66cc00;
+.card-container .card-placeholder > span {
+    display: table-cell;
+    vertical-align: middle;
 }
 
-.card-container .card-value.lowest {
-    background-color: #cc0000;
-}
-
-.card-container .card-value {
+.card-container .card-value span {
+    display: table-cell;
     font-size: 126px;
-    padding: 18% 0;
+    vertical-align: middle;
 }
 
 .card-container .user-name {
@@ -214,30 +270,49 @@ nav.navbar .container-fluid .btn {
 /* ---------------------------------------------------------- CARD PICK ---------------------------------------------------------- */
 
 .card-pick-container {
-    user-select: none;
     padding: 6px;
+    user-select: none;
+    text-align: center;
 }
 
-/* (600 - (2*6 padding + 6*10 margin)) / 3 = 176 */
 .card-pick-container .card {
     width: 176px;
     height: 192px;
     margin: 10px;
-    opacity: 1;
     display: inline-block;
-    background-color: #2670e0;
-    color: white;
+    background-color: #f2f2f2;
+    color: #f2f2f2;
     border-radius: 5px;
     text-align: center;
     font-size: 120px;
     line-height: 176px;
+    cursor: pointer;
 }
 
-.card-pick-container .card.fade {
-    visibility: hidden;
+.card-pick-container .selected-card-container {
+    width: 176px;
+    display: inline-block;
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
 }
 
-.card-pick-container .card.selected {
-    transition: opacity 2s;
-    opacity: 0;
+.card-pick-container .spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.card-pick-container .spinner-container i {
+    font-size: 150px;
+}
+
+.card-pick-container .selected-card-container .card-picked {
+    margin-top: 10px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
 }

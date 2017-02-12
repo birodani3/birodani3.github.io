@@ -1,7 +1,17 @@
 <div class="result-buttons">
-    <div ng-hide="flip || !notChosenCount">Waiting for {{notChosenCount}} people...</div>
     <div ng-show="flip" class="btn btn-default" ng-click="reset()">Reset</div>
 </div>
 <div class="result-container">
-    <card ng-repeat="card in cards" card="card" flip="flip"></card>
+    <div class="card-container"ng-repeat="card in cards">
+        <div class="card-placeholder" ng-style="{ 'background-color': cardColor }" ng-hide="flip">
+            <div ng-show="card.value == null">
+                <div class="dots"><span>.</span><span>.</span><span>.</span></div>
+            </div>
+            <span ng-show="card.value != null"><i class="fa fa-check"></i></span>
+        </div>
+        <div class="card-value" ng-style="{ 'background-color': cardColor }" ng-show="flip">
+            <span>{{card.value}}</span>
+        </div>
+        <div class="user-name">{{card.name}}</div>
+    </div>
 </div>
