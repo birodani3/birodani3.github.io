@@ -23,10 +23,42 @@ hr {
 	cursor: not-allowed;
 }
 
+.spinner {
+    margin: 0 ~"calc((100% - 65px) / 2)";
+    animation: rotator 1.4s linear infinite;
+}
+
+.path {
+    stroke-dasharray: 187;
+    stroke-dashoffset: 0;
+    stroke: blue;
+    transform-origin: center;
+    animation: dash 1.4s ease-in-out infinite,
+}
+
+@keyframes dash {
+    0% {
+        stroke-dashoffset: 187;
+    }
+    50% {
+        stroke-dashoffset: 187/4;
+        transform:rotate(135deg);
+    }
+    100% {
+        stroke-dashoffset: 187;
+        transform:rotate(450deg);
+    }
+}
+
 @keyframes blink {
 	0%   { opacity: .2; }
     20%  { opacity:  1; }
     100% { opacity: .2; }
+}
+
+@keyframes rotator {
+    0%   { transform: rotate(0deg);   }
+    100% { transform: rotate(270deg); }
 }
 
 .dots {
