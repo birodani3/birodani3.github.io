@@ -257,7 +257,8 @@ input[type=password]:hover {
   width: 100%;
 }
 .result-buttons > div {
-  display: inline-block;
+  margin-right: 5px;
+  float: left;
 }
 .result-container {
   perspective: 1000px;
@@ -275,6 +276,10 @@ input[type=password]:hover {
   width: 200px;
   float: left;
   position: relative;
+}
+.result-container .card-container.selected-card .front,
+.result-container .card-container.selected-card .back {
+  box-shadow: 0 4px 8px 0 #ff0000;
 }
 .result-container .front,
 .result-container .back {

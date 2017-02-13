@@ -1,8 +1,9 @@
 <div class="result-buttons">
-    <div ng-show="flip" class="btn btn-default" ng-click="reset()">Reset&nbsp;<i class="fa fa-repeat"></i></div>
+    <div ng-show="cards.length" class="btn btn-default" ng-click="reset()">Reset&nbsp;<i class="fa fa-repeat"></i></div>
+    <div ng-show="selectedCard" class="btn btn-default" ng-click="kick(selectedCard)">Remove&nbsp;<i class="fa fa-ban"></i></div>
 </div>
 <div class="result-container" ng-class="{ 'flip': flip }">
-    <div ng-repeat="card in cards" class="card-container">
+    <div ng-repeat="card in cards" class="card-container" ng-click="selectCard(card)" ng-class="{ 'selected-card': card.isSelected }">
         <div class="front" ng-style="{ 'transition': settings.animation ? '0.6s' : '0s' }">
             <div class="card-value" ng-style="{ 'background-color': settings.color }">
                 <div ng-show="card.value == null">

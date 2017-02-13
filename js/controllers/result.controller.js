@@ -11,6 +11,7 @@
         $scope.settings = store.getSettings();
         $scope.canUndo = $scope.settings.undo;
         $scope.flip = false;
+        $scope.selectedCard = null;
         $scope.cards = [];
 
         msgService.listen("ANY", checkStatsAsync);
@@ -36,6 +37,25 @@
 
             $scope.canUndo = $scope.settings.undo;
             $scope.flip = false;
+        }
+
+        $scope.selectCard = function(card) {
+            card.isSelected = !card.isSelected;
+
+            $scope.cards.forEach(function(_card) {
+                if (card !== _card) {
+                    card.isSelected = false;
+                }
+            });
+
+            $scope.selectedCard = card.isSelected;
+        }
+
+        $scope.kick = function(card) {
+            $scope.selectedCard = null;
+            _.pull($scope.cards, card);í
+
+            checkStats();
         }
 
         function onUserLeft(data) {

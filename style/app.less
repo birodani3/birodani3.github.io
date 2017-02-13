@@ -310,8 +310,9 @@ input[type=password] {
 	width: 100%;
 }
 
-.result-buttons>div {
-	display: inline-block;
+.result-buttons > div {
+	margin-right: 5px;
+	float: left;
 }
 
 .result-container {
@@ -334,6 +335,11 @@ input[type=password] {
 		width: 200px;
 		float: left;
 		position: relative;
+
+		&.selected-card .front,
+		&.selected-card .back {
+			box-shadow: 0 4px 8px 0 rgba(255, 0, 0, 1);
+		}
 	}
 
 	.front,

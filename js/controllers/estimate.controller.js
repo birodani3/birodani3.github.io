@@ -8,6 +8,7 @@
     EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'store', 'msgService'];
 
     function EstimateController ($rootScope, $scope, $timeout, toastr, store, msgService) {
+        var undoTimeout;
         $scope.selected = false;
         $scope.undoEnabled = true;
         $scope.settings = {
@@ -42,7 +43,7 @@
             });
 
             if ($scope.undoEnabled) {
-                $timeout(function() {
+                undoTimeout = $timeout(function() {
                     if ($scope.selected) {
                         $scope.undoEnabled = false;
                     }
@@ -51,6 +52,8 @@
         }
 
         $scope.undo = function() {
+            $timeout.cancel(undoTimeout);
+
             msgService.send({
                 type: "USER_UNDO",
                 message: {
@@ -62,6 +65,10 @@
         $scope.isSelected = function(value) {
             return $scope.selectedValue === value;
         }
+
+        $scope.$on("$destroy", function() {
+            $timeout.cancel(undoTimeout);
+        });
 
         function reset(data) {
             if (!data.uuid || data.uuid === store.getUser().uuid) {
