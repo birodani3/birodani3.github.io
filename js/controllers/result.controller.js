@@ -51,11 +51,23 @@
             $scope.selectedCard = card.isSelected;
         }
 
-        $scope.kick = function(card) {
+        $scope.removeSelectedCard = function() {
             $scope.selectedCard = null;
-            _.pull($scope.cards, card);í
 
-            checkStats();
+            var card = _.find($scope.cards, "isSelected");
+
+            if (card) {
+                msgService.send({
+                    type: "REMOVE",
+                    message: {
+                        uuid: card.uuid
+                    }
+                });
+
+                _.pull($scope.cards, card);
+
+                checkStats();
+            }
         }
 
         function onUserLeft(data) {

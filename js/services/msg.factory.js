@@ -67,6 +67,7 @@
 
             if (pubNub) {
                 listeners.forEach(pubNub.removeListener);
+                
                 pubNub.unsubscribe({
                     channels: [channel]
                 });

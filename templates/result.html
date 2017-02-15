@@ -1,6 +1,6 @@
 <div class="result-buttons">
     <div ng-show="cards.length" class="btn btn-default" ng-click="reset()">Reset&nbsp;<i class="fa fa-repeat"></i></div>
-    <div ng-show="selectedCard" class="btn btn-default" ng-click="kick(selectedCard)">Remove&nbsp;<i class="fa fa-ban"></i></div>
+    <div ng-show="selectedCard" class="btn btn-default" ng-click="removeSelectedCard()">Remove&nbsp;<i class="fa fa-ban"></i></div>
 </div>
 <div class="result-container" ng-class="{ 'flip': flip }">
     <div ng-repeat="card in cards" class="card-container" ng-click="selectCard(card)" ng-class="{ 'selected-card': card.isSelected }">

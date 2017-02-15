@@ -22,9 +22,9 @@
         .value('isMobile', (function() { return 'ontouchstart' in document; })())
         .run(run);
     
-    run.$inject = ["$rootScope", "isMobile"];
+    run.$inject = ["$rootScope", "$window", "isMobile", "msgService"];
 
-    function run($rootScope, isMobile) {
+    function run($rootScope, $window, isMobile, msgService) {
         $rootScope.isMobile = isMobile;
 
         // Remove :hover and :active css rules on touch devices
@@ -47,6 +47,11 @@
                 }
             } catch (ex) {}
         }
+
+        // Unsubscribe on page unload
+        $window.addEventListener("beforeunload", function() {
+            msgService.unsubscribe();
+        });
     }
 
 })();
