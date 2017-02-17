@@ -22,9 +22,9 @@
         .value('isMobile', (() => 'ontouchstart' in document )())
         .run(run);
     
-    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "msgService"];
+    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "store", "msgService"];
 
-    function run($rootScope, $window, $document, isMobile, msgService) {
+    function run($rootScope, $window, $document, isMobile, store, msgService) {
         if (isMobile) {
             // Adding mobile class to body
             $document.find("body").addClass("mobile");
@@ -32,9 +32,7 @@
             // Remove :hover and :active css rules on touch devices
             // Prevent exception on browsers not supporting DOM styleSheets properly
             try {
-                for (let index in document.styleSheets) {
-                    let styleSheet = document.styleSheets[index];
-
+                for (let styleSheet of document.styleSheets) {
                     if (!styleSheet.rules) {
                         continue;
                     }
@@ -53,6 +51,26 @@
         // Unsubscribe on page unload
         $window.addEventListener("beforeunload", () => {
             msgService.unsubscribe();
+        });
+
+        // Fill up store with default settings
+        store.setSettings({
+            undo: true,
+            showName: true,
+            animation: true,
+            color: "#2670e0",
+            values: {
+                0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
+                13: true, 20: true, 40: true, "∞": true, "?": true
+            }
+        });
+
+        // Fill up store with default user data
+        store.setUser({
+            uuid: null,
+            name: null,
+            channel: null,
+            isHost: false
         });
     }
 
@@ -136,12 +154,10 @@
 
         //////////////////////////////////////////////////////////////
 
-        msgService.listen("ANY", applyChangesAsync);
         msgService.listen("RESET", reset);
         msgService.listen("SETTINGS", saveSettings);
         msgService.listen("REMOVE", onRemoved);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
-        msgService.listenPresence(["ANY"], applyChangesAsync);
         msgService.send({
             type: "USER_JOINED",
             message: store.getUser()
@@ -221,14 +237,6 @@
                 $scope.leaveChannel();
             }
         }
-
-        // Apply is needed because pubNub callbacks are executed from outside of angular's scope
-        // Timeout is needed because there is no guarantee that the "ANY" callback gets called later than other event callbacks
-        function applyChangesAsync() {
-            $timeout(() => {
-                $scope.$apply();
-            });
-        }
     }
 
 }());
@@ -253,7 +261,7 @@
         $scope.state = $scope.states.SELECT_MODE;
         $scope.title = "Estimation";
         $scope.defaultSettings = store.getSettings();
-        $scope.settings = getSettingsFromCookie() || store.getSettings();
+        $scope.settings = getSettings();
         
         msgService.unsubscribe();
         store.setUser({ name: null, channel: null, isHost: false });
@@ -305,15 +313,15 @@
             $scope.isLoading = true;
             $scope.channels = [];
 
-            msgService.hereNow(function(status, data) {
+            msgService.hereNow((status, data) => {
                 $scope.channels = _.keys(data.channels);
                 $scope.isLoading = false;
 
-                $rootScope.$apply(callback);
+                callback();
             });
         }
 
-        $scope.createChannel = function(channel) {
+        $scope.createChannel = (channel) => {
             channel = channel.trim();
 
             if (channel) {
@@ -368,10 +376,13 @@
             store.unsubscribe(onUserChanged);
         });
 
-        function getSettingsFromCookie() {
-            let settingsString = $cookies.get("settings");
+        function getSettings() {
+            let settings = store.getSettings();
 
-            return settingsString ? JSON.parse(settingsString) : null;
+            let cookieSettingsString = $cookies.get("settings");
+            let cookieSettings = cookieSettingsString ? JSON.parse(cookieSettingsString) : null;
+
+            return angular.merge(settings, cookieSettings);
         }
 
         function onUserChanged(user) {
@@ -394,19 +405,19 @@
     function MainController ($rootScope, $scope, $location, store) {
         $scope.user = null;
 
-        store.subscribe("user", function(user) {
+        store.subscribe("user", (user) => {
             $scope.user = user;
         });
 
-        $scope.hasChannel = function() {
+        $scope.hasChannel = () => {
             return $scope.user.channel;
         }
 
-        $scope.leaveChannel = function() {
+        $scope.leaveChannel = () => {
             $location.path("/login");
         }
 
-        $scope.isHost = function() {
+        $scope.isHost = () => {
             return $scope.user.isHost;
         }
     }
@@ -428,14 +439,14 @@
         $scope.selectedCard = null;
         $scope.cards = [];
 
-        msgService.listen("ANY", checkStatsAsync);
         msgService.listen("USER_PICKED", onUserPicked);
         msgService.listen("USER_JOINED", onUserJoined);
         msgService.listen("USER_UNDO", onUserUndo);
-        msgService.listenPresence(["ANY"], checkStatsAsync);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
 
         store.setUser({ isHost: true });
+
+        let undoTimeout;
         
         $scope.reset = () => {
             $scope.cards.forEach((card) => {
@@ -492,6 +503,8 @@
                     return card === _card;
                 });
 
+                checkStats();
+
                 toastr.info("User " + card.name + " left", "Info");
             }
         }
@@ -515,6 +528,7 @@
                 return;
             }
 
+            $timeout.cancel(undoTimeout);
             let card = findCardByUuid(data.uuid);
 
             if (card) {
@@ -529,6 +543,8 @@
 
             if (card) {
                 card.value = data.value;
+
+                checkStats();
             }
         }
 
@@ -555,7 +571,7 @@
                     $scope.canUndo = false;
 
                     // Wait extra 3 secs for the last client's possible undo
-                    $timeout(checkStats, 3000);
+                    undoTimeout = $timeout(checkStats, 3000);
                 } else {
                     $scope.flip = true;
                 }
@@ -566,6 +582,7 @@
 
         function sendSettingsToUser(user) {
             let settingsToSend = angular.copy($scope.settings);
+            
             // Only the accepted values are sent as an array
             settingsToSend.values = _.reduce(settingsToSend.values, (result, value, key) => {
                 if (value) {
@@ -583,12 +600,6 @@
                     settings: settingsToSend
                 }
             });
-        }
-
-        // Angular does not know about pubNub event callbacks
-        // We have to initiate a $digest cycle manually by $evalAsync
-        function checkStatsAsync() {
-            $rootScope.$evalAsync(checkStats);
         }
     }
 
@@ -676,11 +687,9 @@
 
         function listen(type, callback) {
             let listener = {
-                message: function(data) {
-                    if (type === "ANY") {
-                        callback(data.message.message)
-                    } else if (data.message.type === type) {
-                        callback(data.message.message)
+                message: (data) => {
+                    if (type === "ANY" || data.message.type === type) {
+                        $rootScope.$evalAsync(() => callback(data.message.message));
                     }
                 }
             }
@@ -691,14 +700,14 @@
 
         function listenPresence(actions, callback) {
             let listener = {
-                presence: function(data) {
+                presence: (data) => {
                     // User will not get his/her own presence messages
                     if (data.uuid === store.getUser().uuid) {
                         return;
                     }
 
                     if (_.includes(actions, data.action) || _.includes(actions, "ANY")) {
-                        callback(data);
+                        $rootScope.$evalAsync(() => callback(data));
                     }
                 }
             };
@@ -708,7 +717,9 @@
         }
 
         function hereNow(callback) {
-            pubNub.hereNow({ uuids: false }, callback);
+            let pubNubCallback = (...params) => $rootScope.$evalAsync(() => callback(...params));
+
+            pubNub.hereNow({ uuids: false }, pubNubCallback);
         }
     }
 
@@ -722,26 +733,12 @@
     store.$inject = ["$rootScope", "lodash"];
 
     function store($rootScope, _) {
-        let subscriptions = []
+        let subscriptions = [];
 
         // Default settings
         let store = {
-            settings: {
-                undo: true,
-                showName: true,
-                animation: true,
-                color: "#2670e0",
-                values: {
-                    0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
-                    13: true, 20: true, 40: true, "∞": true, "?": true
-                }
-            },
-            user: {
-                uuid: null,
-                name: null,
-                channel: null,
-                isHost: false
-            }
+            settings: {},
+            user: {}
         };
       
         return {

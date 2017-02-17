@@ -8,26 +8,12 @@
     store.$inject = ["$rootScope", "lodash"];
 
     function store($rootScope, _) {
-        let subscriptions = []
+        let subscriptions = [];
 
         // Default settings
         let store = {
-            settings: {
-                undo: true,
-                showName: true,
-                animation: true,
-                color: "#2670e0",
-                values: {
-                    0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
-                    13: true, 20: true, 40: true, "∞": true, "?": true
-                }
-            },
-            user: {
-                uuid: null,
-                name: null,
-                channel: null,
-                isHost: false
-            }
+            settings: {},
+            user: {}
         };
       
         return {

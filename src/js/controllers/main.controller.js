@@ -10,19 +10,19 @@
     function MainController ($rootScope, $scope, $location, store) {
         $scope.user = null;
 
-        store.subscribe("user", function(user) {
+        store.subscribe("user", (user) => {
             $scope.user = user;
         });
 
-        $scope.hasChannel = function() {
+        $scope.hasChannel = () => {
             return $scope.user.channel;
         }
 
-        $scope.leaveChannel = function() {
+        $scope.leaveChannel = () => {
             $location.path("/login");
         }
 
-        $scope.isHost = function() {
+        $scope.isHost = () => {
             return $scope.user.isHost;
         }
     }

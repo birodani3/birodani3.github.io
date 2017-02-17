@@ -81,11 +81,9 @@
 
         function listen(type, callback) {
             let listener = {
-                message: function(data) {
-                    if (type === "ANY") {
-                        callback(data.message.message)
-                    } else if (data.message.type === type) {
-                        callback(data.message.message)
+                message: (data) => {
+                    if (type === "ANY" || data.message.type === type) {
+                        $rootScope.$evalAsync(() => callback(data.message.message));
                     }
                 }
             }
@@ -96,14 +94,14 @@
 
         function listenPresence(actions, callback) {
             let listener = {
-                presence: function(data) {
+                presence: (data) => {
                     // User will not get his/her own presence messages
                     if (data.uuid === store.getUser().uuid) {
                         return;
                     }
 
                     if (_.includes(actions, data.action) || _.includes(actions, "ANY")) {
-                        callback(data);
+                        $rootScope.$evalAsync(() => callback(data));
                     }
                 }
             };
@@ -113,7 +111,9 @@
         }
 
         function hereNow(callback) {
-            pubNub.hereNow({ uuids: false }, callback);
+            let pubNubCallback = (...params) => $rootScope.$evalAsync(() => callback(...params));
+
+            pubNub.hereNow({ uuids: false }, pubNubCallback);
         }
     }
 

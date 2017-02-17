@@ -18,9 +18,9 @@
         return 'ontouchstart' in document;
     }()).run(run);
 
-    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "msgService"];
+    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "store", "msgService"];
 
-    function run($rootScope, $window, $document, isMobile, msgService) {
+    function run($rootScope, $window, $document, isMobile, store, msgService) {
         if (isMobile) {
             // Adding mobile class to body
             $document.find("body").addClass("mobile");
@@ -28,18 +28,37 @@
             // Remove :hover and :active css rules on touch devices
             // Prevent exception on browsers not supporting DOM styleSheets properly
             try {
-                for (var index in document.styleSheets) {
-                    var styleSheet = document.styleSheets[index];
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
 
-                    if (!styleSheet.rules) {
-                        continue;
+                try {
+                    for (var _iterator = document.styleSheets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var styleSheet = _step.value;
+
+                        if (!styleSheet.rules) {
+                            continue;
+                        }
+
+                        for (var i = styleSheet.rules.length - 1; i >= 0; i--) {
+                            if (!styleSheet.rules[i].selectorText) continue;
+
+                            if (styleSheet.rules[i].selectorText.match(':hover') || styleSheet.rules[i].selectorText.match(':active')) {
+                                styleSheet.deleteRule(i);
+                            }
+                        }
                     }
-
-                    for (var i = styleSheet.rules.length - 1; i >= 0; i--) {
-                        if (!styleSheet.rules[i].selectorText) continue;
-
-                        if (styleSheet.rules[i].selectorText.match(':hover') || styleSheet.rules[i].selectorText.match(':active')) {
-                            styleSheet.deleteRule(i);
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
                         }
                     }
                 }
@@ -49,6 +68,26 @@
         // Unsubscribe on page unload
         $window.addEventListener("beforeunload", function () {
             msgService.unsubscribe();
+        });
+
+        // Fill up store with default settings
+        store.setSettings({
+            undo: true,
+            showName: true,
+            animation: true,
+            color: "#2670e0",
+            values: {
+                0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
+                13: true, 20: true, 40: true, "∞": true, "?": true
+            }
+        });
+
+        // Fill up store with default user data
+        store.setUser({
+            uuid: null,
+            name: null,
+            channel: null,
+            isHost: false
         });
     }
 })();;(function () {
@@ -122,12 +161,10 @@
 
         //////////////////////////////////////////////////////////////
 
-        msgService.listen("ANY", applyChangesAsync);
         msgService.listen("RESET", reset);
         msgService.listen("SETTINGS", saveSettings);
         msgService.listen("REMOVE", onRemoved);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
-        msgService.listenPresence(["ANY"], applyChangesAsync);
         msgService.send({
             type: "USER_JOINED",
             message: store.getUser()
@@ -207,14 +244,6 @@
                 $scope.leaveChannel();
             }
         }
-
-        // Apply is needed because pubNub callbacks are executed from outside of angular's scope
-        // Timeout is needed because there is no guarantee that the "ANY" callback gets called later than other event callbacks
-        function applyChangesAsync() {
-            $timeout(function () {
-                $scope.$apply();
-            });
-        }
     }
 })();
 ;(function () {
@@ -236,7 +265,7 @@
         $scope.state = $scope.states.SELECT_MODE;
         $scope.title = "Estimation";
         $scope.defaultSettings = store.getSettings();
-        $scope.settings = getSettingsFromCookie() || store.getSettings();
+        $scope.settings = getSettings();
 
         msgService.unsubscribe();
         store.setUser({ name: null, channel: null, isHost: false });
@@ -294,7 +323,7 @@
                 $scope.channels = _.keys(data.channels);
                 $scope.isLoading = false;
 
-                $rootScope.$apply(callback);
+                callback();
             });
         };
 
@@ -353,10 +382,13 @@
             store.unsubscribe(onUserChanged);
         });
 
-        function getSettingsFromCookie() {
-            var settingsString = $cookies.get("settings");
+        function getSettings() {
+            var settings = store.getSettings();
 
-            return settingsString ? JSON.parse(settingsString) : null;
+            var cookieSettingsString = $cookies.get("settings");
+            var cookieSettings = cookieSettingsString ? JSON.parse(cookieSettingsString) : null;
+
+            return angular.merge(settings, cookieSettings);
         }
 
         function onUserChanged(user) {
@@ -407,14 +439,14 @@
         $scope.selectedCard = null;
         $scope.cards = [];
 
-        msgService.listen("ANY", checkStatsAsync);
         msgService.listen("USER_PICKED", onUserPicked);
         msgService.listen("USER_JOINED", onUserJoined);
         msgService.listen("USER_UNDO", onUserUndo);
-        msgService.listenPresence(["ANY"], checkStatsAsync);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
 
         store.setUser({ isHost: true });
+
+        var undoTimeout = void 0;
 
         $scope.reset = function () {
             $scope.cards.forEach(function (card) {
@@ -471,6 +503,8 @@
                     return card === _card;
                 });
 
+                checkStats();
+
                 toastr.info("User " + card.name + " left", "Info");
             }
         }
@@ -494,6 +528,7 @@
                 return;
             }
 
+            $timeout.cancel(undoTimeout);
             var card = findCardByUuid(data.uuid);
 
             if (card) {
@@ -508,6 +543,8 @@
 
             if (card) {
                 card.value = data.value;
+
+                checkStats();
             }
         }
 
@@ -534,7 +571,7 @@
                     $scope.canUndo = false;
 
                     // Wait extra 3 secs for the last client's possible undo
-                    $timeout(checkStats, 3000);
+                    undoTimeout = $timeout(checkStats, 3000);
                 } else {
                     $scope.flip = true;
                 }
@@ -545,6 +582,7 @@
 
         function sendSettingsToUser(user) {
             var settingsToSend = angular.copy($scope.settings);
+
             // Only the accepted values are sent as an array
             settingsToSend.values = _.reduce(settingsToSend.values, function (result, value, key) {
                 if (value) {
@@ -562,12 +600,6 @@
                     settings: settingsToSend
                 }
             });
-        }
-
-        // Angular does not know about pubNub event callbacks
-        // We have to initiate a $digest cycle manually by $evalAsync
-        function checkStatsAsync() {
-            $rootScope.$evalAsync(checkStats);
         }
     }
 })();
@@ -659,10 +691,10 @@
         function listen(type, callback) {
             var listener = {
                 message: function message(data) {
-                    if (type === "ANY") {
-                        callback(data.message.message);
-                    } else if (data.message.type === type) {
-                        callback(data.message.message);
+                    if (type === "ANY" || data.message.type === type) {
+                        $rootScope.$evalAsync(function () {
+                            return callback(data.message.message);
+                        });
                     }
                 }
             };
@@ -680,7 +712,9 @@
                     }
 
                     if (_.includes(actions, data.action) || _.includes(actions, "ANY")) {
-                        callback(data);
+                        $rootScope.$evalAsync(function () {
+                            return callback(data);
+                        });
                     }
                 }
             };
@@ -690,7 +724,17 @@
         }
 
         function hereNow(callback) {
-            pubNub.hereNow({ uuids: false }, callback);
+            var pubNubCallback = function pubNubCallback() {
+                for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+                    params[_key] = arguments[_key];
+                }
+
+                return $rootScope.$evalAsync(function () {
+                    return callback.apply(undefined, params);
+                });
+            };
+
+            pubNub.hereNow({ uuids: false }, pubNubCallback);
         }
     }
 })();;(function () {
@@ -705,22 +749,8 @@
 
         // Default settings
         var store = {
-            settings: {
-                undo: true,
-                showName: true,
-                animation: true,
-                color: "#2670e0",
-                values: {
-                    0: true, 1: true, 2: true, 3: true, 5: true, 8: true,
-                    13: true, 20: true, 40: true, "∞": true, "?": true
-                }
-            },
-            user: {
-                uuid: null,
-                name: null,
-                channel: null,
-                isHost: false
-            }
+            settings: {},
+            user: {}
         };
 
         return {

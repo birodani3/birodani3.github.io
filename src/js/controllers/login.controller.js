@@ -19,7 +19,7 @@
         $scope.state = $scope.states.SELECT_MODE;
         $scope.title = "Estimation";
         $scope.defaultSettings = store.getSettings();
-        $scope.settings = getSettingsFromCookie() || store.getSettings();
+        $scope.settings = getSettings();
         
         msgService.unsubscribe();
         store.setUser({ name: null, channel: null, isHost: false });
@@ -71,15 +71,15 @@
             $scope.isLoading = true;
             $scope.channels = [];
 
-            msgService.hereNow(function(status, data) {
+            msgService.hereNow((status, data) => {
                 $scope.channels = _.keys(data.channels);
                 $scope.isLoading = false;
 
-                $rootScope.$apply(callback);
+                callback();
             });
         }
 
-        $scope.createChannel = function(channel) {
+        $scope.createChannel = (channel) => {
             channel = channel.trim();
 
             if (channel) {
@@ -134,10 +134,13 @@
             store.unsubscribe(onUserChanged);
         });
 
-        function getSettingsFromCookie() {
-            let settingsString = $cookies.get("settings");
+        function getSettings() {
+            let settings = store.getSettings();
 
-            return settingsString ? JSON.parse(settingsString) : null;
+            let cookieSettingsString = $cookies.get("settings");
+            let cookieSettings = cookieSettingsString ? JSON.parse(cookieSettingsString) : null;
+
+            return angular.merge(settings, cookieSettings);
         }
 
         function onUserChanged(user) {

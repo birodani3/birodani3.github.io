@@ -20,7 +20,7 @@
                     <span class="navbar-brand">Estimation</span>
                 </div>
                 <p class="navbar-text navbar-right" ng-show="hasChannel()"><span ng-if="!isHost()">{{user.name}} at </span>channel '{{user.channel}}'</p>
-                <div class="btn btn-default navbar-right" ng-click="leaveChannel()" ng-show="hasChannel() && !isHost()">Leave channel</div>
+                <div class="btn btn-default navbar-right" ng-click="leaveChannel()" ng-show="hasChannel()">Leave channel</div>
             </div>
         </nav>
 

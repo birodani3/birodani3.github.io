@@ -19,12 +19,10 @@
 
         //////////////////////////////////////////////////////////////
 
-        msgService.listen("ANY", applyChangesAsync);
         msgService.listen("RESET", reset);
         msgService.listen("SETTINGS", saveSettings);
         msgService.listen("REMOVE", onRemoved);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
-        msgService.listenPresence(["ANY"], applyChangesAsync);
         msgService.send({
             type: "USER_JOINED",
             message: store.getUser()
@@ -103,14 +101,6 @@
                 toastr.warning("Channel host left. Leaving channel.", "Warning");
                 $scope.leaveChannel();
             }
-        }
-
-        // Apply is needed because pubNub callbacks are executed from outside of angular's scope
-        // Timeout is needed because there is no guarantee that the "ANY" callback gets called later than other event callbacks
-        function applyChangesAsync() {
-            $timeout(() => {
-                $scope.$apply();
-            });
         }
     }
 

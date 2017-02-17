@@ -14,14 +14,14 @@
         $scope.selectedCard = null;
         $scope.cards = [];
 
-        msgService.listen("ANY", checkStatsAsync);
         msgService.listen("USER_PICKED", onUserPicked);
         msgService.listen("USER_JOINED", onUserJoined);
         msgService.listen("USER_UNDO", onUserUndo);
-        msgService.listenPresence(["ANY"], checkStatsAsync);
         msgService.listenPresence(["leave", "timeout"], onUserLeft);
 
         store.setUser({ isHost: true });
+
+        let undoTimeout;
         
         $scope.reset = () => {
             $scope.cards.forEach((card) => {
@@ -78,6 +78,8 @@
                     return card === _card;
                 });
 
+                checkStats();
+
                 toastr.info("User " + card.name + " left", "Info");
             }
         }
@@ -101,6 +103,7 @@
                 return;
             }
 
+            $timeout.cancel(undoTimeout);
             let card = findCardByUuid(data.uuid);
 
             if (card) {
@@ -115,6 +118,8 @@
 
             if (card) {
                 card.value = data.value;
+
+                checkStats();
             }
         }
 
@@ -141,7 +146,7 @@
                     $scope.canUndo = false;
 
                     // Wait extra 3 secs for the last client's possible undo
-                    $timeout(checkStats, 3000);
+                    undoTimeout = $timeout(checkStats, 3000);
                 } else {
                     $scope.flip = true;
                 }
@@ -152,6 +157,7 @@
 
         function sendSettingsToUser(user) {
             let settingsToSend = angular.copy($scope.settings);
+            
             // Only the accepted values are sent as an array
             settingsToSend.values = _.reduce(settingsToSend.values, (result, value, key) => {
                 if (value) {
@@ -169,12 +175,6 @@
                     settings: settingsToSend
                 }
             });
-        }
-
-        // Angular does not know about pubNub event callbacks
-        // We have to initiate a $digest cycle manually by $evalAsync
-        function checkStatsAsync() {
-            $rootScope.$evalAsync(checkStats);
         }
     }
 
