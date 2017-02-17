@@ -1,0 +1,66 @@
+<div class="loginmodal-container">
+    <div class="btn btn-default btn-left" ng-show="state !== states.SELECT_MODE" ng-click="back()">
+        <i class="fa fa-arrow-left"></i>&nbsp;Back
+    </div>
+    <div class="btn btn-default btn-right" ng-class="{ 'disabled': isLoading }" ng-show="state === states.JOIN_CHANNEL" ng-click="isLoading || loadChannels()">
+        <i class="fa fa-refresh" ng-class="{ 'fa-spin': isLoading }"></i>&nbsp;Refresh
+    </div>
+    <div class="btn btn-default btn-right" ng-show="state === states.CREATE_CHANNEL" ng-click="changeState(states.SETTINGS)">
+        <i class="fa fa-cog"></i>&nbsp;Settings
+    </div>
+    <h1 class="title"><span>{{title}}</span></h1><br>
+    <form ng-switch="state">
+        <div ng-switch-when="SELECT_MODE">
+            <div class="btn btn-primary btn-wide" ng-click="changeState(states.CREATE_CHANNEL)">Create channel</div>
+            <div class="btn btn-primary btn-wide" ng-click="changeState(states.JOIN_CHANNEL)">Join channel</div>
+        </div>
+        <div ng-switch-when="SETTINGS">
+            <div class="checkbox checkbox-primary">
+                <input type="checkbox" id="undo-checkbox" ng-model="settings.undo">
+                <label for="undo-checkbox">Enable estimation undo (3sec)</label>
+            </div>
+            <div class="checkbox checkbox-primary">
+                <input type="checkbox" id="name-checkbox" ng-model="settings.showName">
+                <label for="name-checkbox">Show names</label>
+            </div>
+            <div class="checkbox checkbox-primary">
+                <input type="checkbox" id="animation-checkbox" ng-model="settings.animation">
+                <label for="animation-checkbox">Card flip animations</label>
+            </div>
+            <div class="form-group">
+                <label for="color-input">Card color</label>
+                <input class="form-control color-input" type="color" ng-model="settings.color" id="color-input">
+            </div>
+            <hr>
+            <div class="values-container clearfix">
+                <label class="values-label">Values</label>
+                <div class="checkbox-container">
+                    <div class="checkbox checkbox-primary" ng-repeat="(value, x) in settings.values">
+                        <input type="checkbox" id="value-{{$index}}-checkbox" ng-model="settings.values[value]">
+                        <label for="value-{{$index}}-checkbox">{{value}}</label>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="button-container">
+                <div class="btn btn-default" ng-click="saveSettingsToCookie()">Save settings to cookie&nbsp;<i class="fa fa-floppy-o"></i></div>
+                <div class="btn btn-default" ng-click="loadDefaultSettings()">Restore default settings&nbsp;<i class="fa fa-reply-all"></i></div>
+            </div>
+        </div>
+        <div ng-switch-when="CREATE_CHANNEL">
+            <div class="input-group">
+                <span class="input-group-addon" id="channel-addon">Channel name</span>
+                <input type="text" class="form-control" ng-model="channel" aria-describedby="channel-addon">
+            </div>
+            <div class="btn btn-primary btn-wide" ng-click="createChannel(channel)">Create</div>
+        </div>
+        <div ng-switch-when="JOIN_CHANNEL">
+            <div class="input-group">
+                <span class="input-group-addon" id="username-addon">Username</span>
+                <input type="text" class="form-control" ng-model="userName" aria-describedby="username-addon">
+            </div>
+            <div class="btn btn-primary btn-wide" ng-repeat="channel in channels" ng-click="joinChannel(userName, channel)">{{channel}}</div>
+            <div class="text-center channel-message" ng-show="!channels.length && !isLoading">No channels available</div>
+        </div>
+    </form>
+</div>

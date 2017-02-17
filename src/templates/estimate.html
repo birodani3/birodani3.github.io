@@ -1,0 +1,10 @@
+<div class="card-pick-container">
+    <div ng-repeat="value in settings.values" ng-if="!selected" class="card" ng-style="{ 'background-color': settings.color }" ng-click="selectCard(value)">{{value}}</div>
+    <div ng-if="selected && undoEnabled" class="selected-card-container">
+        <div class="card card-picked" ng-style="{ 'background-color': settings.color }">{{selectedValue}}</div>
+        <div class="btn btn-default btn-wide btn-undo" ng-click="undo()">UNDO</div>
+    </div>
+    <div ng-if="selected && !undoEnabled" class="spinner-container">
+        <i class="fa fa-spinner fa-spin"></i>
+    </div>
+</div>
