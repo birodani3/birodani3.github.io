@@ -460,20 +460,22 @@
                 }
             });
 
+            $timeout.cancel(undoTimeout);
             $scope.canUndo = $scope.settings.undo;
+
             $scope.flip = false;
         };
 
         $scope.selectCard = function (card) {
             card.isSelected = !card.isSelected;
 
+            $scope.selectedCard = card.isSelected;
+
             $scope.cards.forEach(function (_card) {
                 if (card !== _card) {
-                    card.isSelected = false;
+                    _card.isSelected = false;
                 }
             });
-
-            $scope.selectedCard = card.isSelected;
         };
 
         $scope.removeSelectedCard = function () {
@@ -503,8 +505,11 @@
                     return card === _card;
                 });
 
-                checkStats();
+                $scope.selectedCard = _.some($scope.cards, function (card) {
+                    return card.isSelected;
+                });
 
+                checkStats();
                 toastr.info("User " + card.name + " left", "Info");
             }
         }
