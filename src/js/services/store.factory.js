@@ -7,11 +7,11 @@
 
     store.$inject = ["$rootScope", "lodash"];
 
-    function store ($rootScope, _) {
-        var subscriptions = []
+    function store($rootScope, _) {
+        let subscriptions = []
 
         // Default settings
-        var store = {
+        let store = {
             settings: {
                 undo: true,
                 showName: true,
@@ -53,9 +53,9 @@
         };
 
         function subscribe(key, callback) {
-            var unsubscribe = $rootScope.$watchCollection(function() {
+            let unsubscribe = $rootScope.$watchCollection(() => {
                 return store[key];
-            }, function(newVal, oldVal) {
+            }, (newVal, oldVal) => {
                 callback(newVal);
             }, true);
 
@@ -66,7 +66,7 @@
         }
 
         function unsubscribe(callback) {
-            var subscription = _.find(subscriptions, { originalCallback: callback });
+            let subscription = _.find(subscriptions, { originalCallback: callback });
             
             if (subscription) {
                 subscription.unsubscribe();

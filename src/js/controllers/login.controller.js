@@ -25,7 +25,7 @@
         store.setUser({ name: null, channel: null, isHost: false });
         store.subscribe("user", onUserChanged);
         
-        $scope.changeState = function(newState) {
+        $scope.changeState = (newState) => {
             $scope.state = newState;
 
             switch(newState) {
@@ -53,8 +53,8 @@
             }
         }
 
-        $scope.back = function() {
-            switch($scope.state) {
+        $scope.back = () => {
+            switch ($scope.state) {
                 case $scope.states.CREATE_CHANNEL:
                 case $scope.states.JOIN_CHANNEL:
                 default:
@@ -67,9 +67,7 @@
             }
         }
 
-        $scope.loadChannels = function(callback) {
-            callback = callback || _.noop;
-
+        $scope.loadChannels = (callback = _.noop) => {
             $scope.isLoading = true;
             $scope.channels = [];
 
@@ -87,7 +85,7 @@
             if (channel) {
                 toastr.info("Checking channel availability...", "Info");
 
-                $scope.loadChannels(function() {
+                $scope.loadChannels(() => {
                     if (_.includes($scope.channels, channel)) {
                         toastr.error("Channel '" + channel + "' already exists.", "Error");
                         return;
@@ -104,7 +102,7 @@
             }
         }
 
-        $scope.joinChannel = function(userName, channel) {
+        $scope.joinChannel = (userName, channel) => {
             userName = userName.trim();
             channel = channel.trim();
 
@@ -121,23 +119,23 @@
             }
         }
 
-        $scope.saveSettingsToCookie = function() {
+        $scope.saveSettingsToCookie = () => {
             $cookies.put("settings", JSON.stringify($scope.settings));
         }
 
-        $scope.loadDefaultSettings = function() {
-            _.forIn($scope.defaultSettings, function(value, key) {
+        $scope.loadDefaultSettings = () => {
+            _.forIn($scope.defaultSettings, (value, key) => {
                 $scope.settings[key] = angular.copy(value);
             });
         }
 
-        $scope.$on("$destroy", function() {
+        $scope.$on("$destroy", () => {
             store.setSettings($scope.settings);
             store.unsubscribe(onUserChanged);
         });
 
         function getSettingsFromCookie() {
-            var settingsString = $cookies.get("settings");
+            let settingsString = $cookies.get("settings");
 
             return settingsString ? JSON.parse(settingsString) : null;
         }

@@ -18,15 +18,16 @@
         return 'ontouchstart' in document;
     }()).run(run);
 
-    run.$inject = ["$rootScope", "$window", "isMobile", "msgService"];
+    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "msgService"];
 
-    function run($rootScope, $window, isMobile, msgService) {
-        $rootScope.isMobile = isMobile;
-
-        // Remove :hover and :active css rules on touch devices
+    function run($rootScope, $window, $document, isMobile, msgService) {
         if (isMobile) {
+            // Adding mobile class to body
+            $document.find("body").addClass("mobile");
+
+            // Remove :hover and :active css rules on touch devices
+            // Prevent exception on browsers not supporting DOM styleSheets properly
             try {
-                // prevent exception on browsers not supporting DOM styleSheets properly
                 for (var index in document.styleSheets) {
                     var styleSheet = document.styleSheets[index];
 
@@ -81,7 +82,7 @@
         // Toastr config
         angular.extend(toastrConfig, {
             newestOnTop: true,
-            maxOpened: 6,
+            maxOpened: 5,
             target: 'body'
         });
 
@@ -110,7 +111,8 @@
     EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'store', 'msgService'];
 
     function EstimateController($rootScope, $scope, $timeout, toastr, store, msgService) {
-        var undoTimeout;
+        var undoTimeout = void 0;
+
         $scope.selected = false;
         $scope.undoEnabled = true;
         $scope.settings = {
@@ -282,8 +284,8 @@
             }
         };
 
-        $scope.loadChannels = function (callback) {
-            callback = callback || _.noop;
+        $scope.loadChannels = function () {
+            var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _.noop;
 
             $scope.isLoading = true;
             $scope.channels = [];
@@ -622,8 +624,8 @@
             });
         }
 
-        function subscribe(channel) {
-            channel = channel || store.getUser().channel;
+        function subscribe() {
+            var channel = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : store.getUser().channel;
 
             pubNub.subscribe({
                 channels: [channel],
@@ -631,8 +633,8 @@
             });
         }
 
-        function unsubscribe(channel) {
-            channel = channel || store.getUser().channel;
+        function unsubscribe() {
+            var channel = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : store.getUser().channel;
 
             if (pubNub) {
                 listeners.forEach(pubNub.removeListener);
@@ -645,8 +647,8 @@
             }
         }
 
-        function send(data, channel) {
-            channel = channel || store.getUser().channel;
+        function send(data) {
+            var channel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : store.getUser().channel;
 
             pubNub.publish({
                 message: data,

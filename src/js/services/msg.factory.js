@@ -7,9 +7,9 @@
 
     msgService.$inject = ["$rootScope", "$cookies", "store", "lodash"];
 
-    function msgService ($rootScope, $cookies, store, _) {
-        var pubNub = null;
-        var listeners = [];
+    function msgService($rootScope, $cookies, store, _) {
+        let pubNub = null;
+        let listeners = [];
 
         return {
             // Init PubNub, set userStore's user uuid
@@ -35,7 +35,7 @@
         };
 
         function init() {
-            var uuid = $cookies.get("uuid");
+            let uuid = $cookies.get("uuid");
 
             if (!uuid) {
                 uuid = PubNub.generateUUID();
@@ -53,18 +53,14 @@
             });
         }
 
-        function subscribe(channel) {
-            channel = channel || store.getUser().channel;
-
+        function subscribe(channel = store.getUser().channel) {
             pubNub.subscribe({
                 channels: [channel],
                 withPresence: true
             });
         }
 
-        function unsubscribe(channel) {
-            channel = channel || store.getUser().channel;
-
+        function unsubscribe(channel = store.getUser().channel) {
             if (pubNub) {
                 listeners.forEach(pubNub.removeListener);
                 
@@ -76,9 +72,7 @@
             }
         }
 
-        function send(data, channel) {
-            channel = channel || store.getUser().channel;
-
+        function send(data, channel = store.getUser().channel) {
             pubNub.publish({
                 message: data,
                 channel: channel
@@ -86,7 +80,7 @@
         }
 
         function listen(type, callback) {
-            var listener = {
+            let listener = {
                 message: function(data) {
                     if (type === "ANY") {
                         callback(data.message.message)
@@ -101,7 +95,7 @@
         }
 
         function listenPresence(actions, callback) {
-            var listener = {
+            let listener = {
                 presence: function(data) {
                     // User will not get his/her own presence messages
                     if (data.uuid === store.getUser().uuid) {

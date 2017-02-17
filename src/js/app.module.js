@@ -1,4 +1,4 @@
-(function() {
+(() => {
     'use strict';
 
     /**
@@ -19,25 +19,27 @@
             'ngLodash',
             'toastr'
         ])
-        .value('isMobile', (function() { return 'ontouchstart' in document; })())
+        .value('isMobile', (() => 'ontouchstart' in document )())
         .run(run);
     
-    run.$inject = ["$rootScope", "$window", "isMobile", "msgService"];
+    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "msgService"];
 
-    function run($rootScope, $window, isMobile, msgService) {
-        $rootScope.isMobile = isMobile;
-
-        // Remove :hover and :active css rules on touch devices
+    function run($rootScope, $window, $document, isMobile, msgService) {
         if (isMobile) {
-            try { // prevent exception on browsers not supporting DOM styleSheets properly
-                for (var index in document.styleSheets) {
-                    var styleSheet = document.styleSheets[index];
+            // Adding mobile class to body
+            $document.find("body").addClass("mobile");
+
+            // Remove :hover and :active css rules on touch devices
+            // Prevent exception on browsers not supporting DOM styleSheets properly
+            try {
+                for (let index in document.styleSheets) {
+                    let styleSheet = document.styleSheets[index];
 
                     if (!styleSheet.rules) {
                         continue;
                     }
 
-                    for (var i = styleSheet.rules.length - 1; i >= 0; i--) {
+                    for (let i = styleSheet.rules.length - 1; i >= 0; i--) {
                         if (!styleSheet.rules[i].selectorText) continue;
 
                         if (styleSheet.rules[i].selectorText.match(':hover') || styleSheet.rules[i].selectorText.match(':active')) {
@@ -49,7 +51,7 @@
         }
 
         // Unsubscribe on page unload
-        $window.addEventListener("beforeunload", function() {
+        $window.addEventListener("beforeunload", () => {
             msgService.unsubscribe();
         });
     }

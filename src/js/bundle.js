@@ -1,4 +1,4 @@
-(function() {
+(() => {
     'use strict';
 
     /**
@@ -19,25 +19,27 @@
             'ngLodash',
             'toastr'
         ])
-        .value('isMobile', (function() { return 'ontouchstart' in document; })())
+        .value('isMobile', (() => 'ontouchstart' in document )())
         .run(run);
     
-    run.$inject = ["$rootScope", "$window", "isMobile", "msgService"];
+    run.$inject = ["$rootScope", "$window", "$document", "isMobile", "msgService"];
 
-    function run($rootScope, $window, isMobile, msgService) {
-        $rootScope.isMobile = isMobile;
-
-        // Remove :hover and :active css rules on touch devices
+    function run($rootScope, $window, $document, isMobile, msgService) {
         if (isMobile) {
-            try { // prevent exception on browsers not supporting DOM styleSheets properly
-                for (var index in document.styleSheets) {
-                    var styleSheet = document.styleSheets[index];
+            // Adding mobile class to body
+            $document.find("body").addClass("mobile");
+
+            // Remove :hover and :active css rules on touch devices
+            // Prevent exception on browsers not supporting DOM styleSheets properly
+            try {
+                for (let index in document.styleSheets) {
+                    let styleSheet = document.styleSheets[index];
 
                     if (!styleSheet.rules) {
                         continue;
                     }
 
-                    for (var i = styleSheet.rules.length - 1; i >= 0; i--) {
+                    for (let i = styleSheet.rules.length - 1; i >= 0; i--) {
                         if (!styleSheet.rules[i].selectorText) continue;
 
                         if (styleSheet.rules[i].selectorText.match(':hover') || styleSheet.rules[i].selectorText.match(':active')) {
@@ -49,7 +51,7 @@
         }
 
         // Unsubscribe on page unload
-        $window.addEventListener("beforeunload", function() {
+        $window.addEventListener("beforeunload", () => {
             msgService.unsubscribe();
         });
     }
@@ -91,7 +93,7 @@
         // Toastr config
         angular.extend(toastrConfig, {
             newestOnTop: true,
-            maxOpened: 6,
+            maxOpened: 5,
             target: 'body'
         });
 
@@ -102,7 +104,7 @@
         // If a resolve function like this returns a rejected promise, a $routeChangeError will be emitted on the $rootScope
         // We listen once to the $routeChangeError and redirect the page to "/"
         function access ($rootScope, $location, $q, store) {
-            var onChangeError = $rootScope.$on("$routeChangeError", function (event, current, previous, rejection) {
+            let onChangeError = $rootScope.$on("$routeChangeError", (event, current, previous, rejection) => {
                 $location.path('/');
 
                 onChangeError();
@@ -123,7 +125,8 @@
     EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'store', 'msgService'];
 
     function EstimateController ($rootScope, $scope, $timeout, toastr, store, msgService) {
-        var undoTimeout;
+        let undoTimeout;
+
         $scope.selected = false;
         $scope.undoEnabled = true;
         $scope.settings = {
@@ -144,7 +147,7 @@
             message: store.getUser()
         });
 
-        $scope.selectCard = function(value) {
+        $scope.selectCard = (value) => {
             if ($scope.selected) {
                 return;
             }
@@ -161,7 +164,7 @@
             });
 
             if ($scope.undoEnabled) {
-                undoTimeout = $timeout(function() {
+                undoTimeout = $timeout(() => {
                     if ($scope.selected) {
                         $scope.undoEnabled = false;
                     }
@@ -169,7 +172,7 @@
             }
         }
 
-        $scope.undo = function() {
+        $scope.undo = () => {
             $timeout.cancel(undoTimeout);
 
             msgService.send({
@@ -180,11 +183,11 @@
             });
         }
 
-        $scope.isSelected = function(value) {
+        $scope.isSelected = (value) => {
             return $scope.selectedValue === value;
         }
 
-        $scope.$on("$destroy", function() {
+        $scope.$on("$destroy", () => {
             $timeout.cancel(undoTimeout);
         });
 
@@ -222,7 +225,7 @@
         // Apply is needed because pubNub callbacks are executed from outside of angular's scope
         // Timeout is needed because there is no guarantee that the "ANY" callback gets called later than other event callbacks
         function applyChangesAsync() {
-            $timeout(function() {
+            $timeout(() => {
                 $scope.$apply();
             });
         }
@@ -256,7 +259,7 @@
         store.setUser({ name: null, channel: null, isHost: false });
         store.subscribe("user", onUserChanged);
         
-        $scope.changeState = function(newState) {
+        $scope.changeState = (newState) => {
             $scope.state = newState;
 
             switch(newState) {
@@ -284,8 +287,8 @@
             }
         }
 
-        $scope.back = function() {
-            switch($scope.state) {
+        $scope.back = () => {
+            switch ($scope.state) {
                 case $scope.states.CREATE_CHANNEL:
                 case $scope.states.JOIN_CHANNEL:
                 default:
@@ -298,9 +301,7 @@
             }
         }
 
-        $scope.loadChannels = function(callback) {
-            callback = callback || _.noop;
-
+        $scope.loadChannels = (callback = _.noop) => {
             $scope.isLoading = true;
             $scope.channels = [];
 
@@ -318,7 +319,7 @@
             if (channel) {
                 toastr.info("Checking channel availability...", "Info");
 
-                $scope.loadChannels(function() {
+                $scope.loadChannels(() => {
                     if (_.includes($scope.channels, channel)) {
                         toastr.error("Channel '" + channel + "' already exists.", "Error");
                         return;
@@ -335,7 +336,7 @@
             }
         }
 
-        $scope.joinChannel = function(userName, channel) {
+        $scope.joinChannel = (userName, channel) => {
             userName = userName.trim();
             channel = channel.trim();
 
@@ -352,23 +353,23 @@
             }
         }
 
-        $scope.saveSettingsToCookie = function() {
+        $scope.saveSettingsToCookie = () => {
             $cookies.put("settings", JSON.stringify($scope.settings));
         }
 
-        $scope.loadDefaultSettings = function() {
-            _.forIn($scope.defaultSettings, function(value, key) {
+        $scope.loadDefaultSettings = () => {
+            _.forIn($scope.defaultSettings, (value, key) => {
                 $scope.settings[key] = angular.copy(value);
             });
         }
 
-        $scope.$on("$destroy", function() {
+        $scope.$on("$destroy", () => {
             store.setSettings($scope.settings);
             store.unsubscribe(onUserChanged);
         });
 
         function getSettingsFromCookie() {
-            var settingsString = $cookies.get("settings");
+            let settingsString = $cookies.get("settings");
 
             return settingsString ? JSON.parse(settingsString) : null;
         }
@@ -436,8 +437,8 @@
 
         store.setUser({ isHost: true });
         
-        $scope.reset = function() {
-            $scope.cards.forEach(function(card) {
+        $scope.reset = () => {
+            $scope.cards.forEach((card) => {
                 card.value = null;
             });
 
@@ -452,10 +453,10 @@
             $scope.flip = false;
         }
 
-        $scope.selectCard = function(card) {
+        $scope.selectCard = (card) => {
             card.isSelected = !card.isSelected;
 
-            $scope.cards.forEach(function(_card) {
+            $scope.cards.forEach((_card) => {
                 if (card !== _card) {
                     card.isSelected = false;
                 }
@@ -464,10 +465,10 @@
             $scope.selectedCard = card.isSelected;
         }
 
-        $scope.removeSelectedCard = function() {
+        $scope.removeSelectedCard = () => {
             $scope.selectedCard = null;
 
-            var card = _.find($scope.cards, "isSelected");
+            let card = _.find($scope.cards, "isSelected");
 
             if (card) {
                 msgService.send({
@@ -484,10 +485,10 @@
         }
 
         function onUserLeft(data) {
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
-                _.remove($scope.cards, function(_card) {
+                _.remove($scope.cards, (_card) => {
                     return card === _card;
                 });
 
@@ -496,7 +497,7 @@
         }
 
         function onUserJoined(user) {
-            var card = {
+            let card = {
                 name: $scope.settings.showName ? user.name : "<hidden>",
                 uuid: user.uuid,
                 value: null
@@ -514,7 +515,7 @@
                 return;
             }
 
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
                 card.value = null;
@@ -524,7 +525,7 @@
         }
 
         function onUserPicked(data) {
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
                 card.value = data.value;
@@ -545,7 +546,7 @@
         }
 
         function checkStats() {
-            var done = _.every($scope.cards, function(card) {
+            let done = _.every($scope.cards, (card) => {
                 return card.value !== null;
             });
 
@@ -564,9 +565,9 @@
         }
 
         function sendSettingsToUser(user) {
-            var settingsToSend = angular.copy($scope.settings);
+            let settingsToSend = angular.copy($scope.settings);
             // Only the accepted values are sent as an array
-            settingsToSend.values = _.reduce(settingsToSend.values, function(result, value, key) {
+            settingsToSend.values = _.reduce(settingsToSend.values, (result, value, key) => {
                 if (value) {
                     result.push(key);
                 }
@@ -601,9 +602,9 @@
 
     msgService.$inject = ["$rootScope", "$cookies", "store", "lodash"];
 
-    function msgService ($rootScope, $cookies, store, _) {
-        var pubNub = null;
-        var listeners = [];
+    function msgService($rootScope, $cookies, store, _) {
+        let pubNub = null;
+        let listeners = [];
 
         return {
             // Init PubNub, set userStore's user uuid
@@ -629,7 +630,7 @@
         };
 
         function init() {
-            var uuid = $cookies.get("uuid");
+            let uuid = $cookies.get("uuid");
 
             if (!uuid) {
                 uuid = PubNub.generateUUID();
@@ -647,18 +648,14 @@
             });
         }
 
-        function subscribe(channel) {
-            channel = channel || store.getUser().channel;
-
+        function subscribe(channel = store.getUser().channel) {
             pubNub.subscribe({
                 channels: [channel],
                 withPresence: true
             });
         }
 
-        function unsubscribe(channel) {
-            channel = channel || store.getUser().channel;
-
+        function unsubscribe(channel = store.getUser().channel) {
             if (pubNub) {
                 listeners.forEach(pubNub.removeListener);
                 
@@ -670,9 +667,7 @@
             }
         }
 
-        function send(data, channel) {
-            channel = channel || store.getUser().channel;
-
+        function send(data, channel = store.getUser().channel) {
             pubNub.publish({
                 message: data,
                 channel: channel
@@ -680,7 +675,7 @@
         }
 
         function listen(type, callback) {
-            var listener = {
+            let listener = {
                 message: function(data) {
                     if (type === "ANY") {
                         callback(data.message.message)
@@ -695,7 +690,7 @@
         }
 
         function listenPresence(actions, callback) {
-            var listener = {
+            let listener = {
                 presence: function(data) {
                     // User will not get his/her own presence messages
                     if (data.uuid === store.getUser().uuid) {
@@ -726,11 +721,11 @@
 
     store.$inject = ["$rootScope", "lodash"];
 
-    function store ($rootScope, _) {
-        var subscriptions = []
+    function store($rootScope, _) {
+        let subscriptions = []
 
         // Default settings
-        var store = {
+        let store = {
             settings: {
                 undo: true,
                 showName: true,
@@ -772,9 +767,9 @@
         };
 
         function subscribe(key, callback) {
-            var unsubscribe = $rootScope.$watchCollection(function() {
+            let unsubscribe = $rootScope.$watchCollection(() => {
                 return store[key];
-            }, function(newVal, oldVal) {
+            }, (newVal, oldVal) => {
                 callback(newVal);
             }, true);
 
@@ -785,7 +780,7 @@
         }
 
         function unsubscribe(callback) {
-            var subscription = _.find(subscriptions, { originalCallback: callback });
+            let subscription = _.find(subscriptions, { originalCallback: callback });
             
             if (subscription) {
                 subscription.unsubscribe();

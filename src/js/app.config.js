@@ -35,7 +35,7 @@
         // Toastr config
         angular.extend(toastrConfig, {
             newestOnTop: true,
-            maxOpened: 6,
+            maxOpened: 5,
             target: 'body'
         });
 
@@ -46,7 +46,7 @@
         // If a resolve function like this returns a rejected promise, a $routeChangeError will be emitted on the $rootScope
         // We listen once to the $routeChangeError and redirect the page to "/"
         function access ($rootScope, $location, $q, store) {
-            var onChangeError = $rootScope.$on("$routeChangeError", function (event, current, previous, rejection) {
+            let onChangeError = $rootScope.$on("$routeChangeError", (event, current, previous, rejection) => {
                 $location.path('/');
 
                 onChangeError();

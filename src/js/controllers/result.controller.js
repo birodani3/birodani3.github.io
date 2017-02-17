@@ -23,8 +23,8 @@
 
         store.setUser({ isHost: true });
         
-        $scope.reset = function() {
-            $scope.cards.forEach(function(card) {
+        $scope.reset = () => {
+            $scope.cards.forEach((card) => {
                 card.value = null;
             });
 
@@ -39,10 +39,10 @@
             $scope.flip = false;
         }
 
-        $scope.selectCard = function(card) {
+        $scope.selectCard = (card) => {
             card.isSelected = !card.isSelected;
 
-            $scope.cards.forEach(function(_card) {
+            $scope.cards.forEach((_card) => {
                 if (card !== _card) {
                     card.isSelected = false;
                 }
@@ -51,10 +51,10 @@
             $scope.selectedCard = card.isSelected;
         }
 
-        $scope.removeSelectedCard = function() {
+        $scope.removeSelectedCard = () => {
             $scope.selectedCard = null;
 
-            var card = _.find($scope.cards, "isSelected");
+            let card = _.find($scope.cards, "isSelected");
 
             if (card) {
                 msgService.send({
@@ -71,10 +71,10 @@
         }
 
         function onUserLeft(data) {
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
-                _.remove($scope.cards, function(_card) {
+                _.remove($scope.cards, (_card) => {
                     return card === _card;
                 });
 
@@ -83,7 +83,7 @@
         }
 
         function onUserJoined(user) {
-            var card = {
+            let card = {
                 name: $scope.settings.showName ? user.name : "<hidden>",
                 uuid: user.uuid,
                 value: null
@@ -101,7 +101,7 @@
                 return;
             }
 
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
                 card.value = null;
@@ -111,7 +111,7 @@
         }
 
         function onUserPicked(data) {
-            var card = findCardByUuid(data.uuid);
+            let card = findCardByUuid(data.uuid);
 
             if (card) {
                 card.value = data.value;
@@ -132,7 +132,7 @@
         }
 
         function checkStats() {
-            var done = _.every($scope.cards, function(card) {
+            let done = _.every($scope.cards, (card) => {
                 return card.value !== null;
             });
 
@@ -151,9 +151,9 @@
         }
 
         function sendSettingsToUser(user) {
-            var settingsToSend = angular.copy($scope.settings);
+            let settingsToSend = angular.copy($scope.settings);
             // Only the accepted values are sent as an array
-            settingsToSend.values = _.reduce(settingsToSend.values, function(result, value, key) {
+            settingsToSend.values = _.reduce(settingsToSend.values, (result, value, key) => {
                 if (value) {
                     result.push(key);
                 }

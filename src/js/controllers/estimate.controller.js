@@ -8,7 +8,8 @@
     EstimateController.$inject = ['$rootScope', '$scope', '$timeout', 'toastr', 'store', 'msgService'];
 
     function EstimateController ($rootScope, $scope, $timeout, toastr, store, msgService) {
-        var undoTimeout;
+        let undoTimeout;
+
         $scope.selected = false;
         $scope.undoEnabled = true;
         $scope.settings = {
@@ -29,7 +30,7 @@
             message: store.getUser()
         });
 
-        $scope.selectCard = function(value) {
+        $scope.selectCard = (value) => {
             if ($scope.selected) {
                 return;
             }
@@ -46,7 +47,7 @@
             });
 
             if ($scope.undoEnabled) {
-                undoTimeout = $timeout(function() {
+                undoTimeout = $timeout(() => {
                     if ($scope.selected) {
                         $scope.undoEnabled = false;
                     }
@@ -54,7 +55,7 @@
             }
         }
 
-        $scope.undo = function() {
+        $scope.undo = () => {
             $timeout.cancel(undoTimeout);
 
             msgService.send({
@@ -65,11 +66,11 @@
             });
         }
 
-        $scope.isSelected = function(value) {
+        $scope.isSelected = (value) => {
             return $scope.selectedValue === value;
         }
 
-        $scope.$on("$destroy", function() {
+        $scope.$on("$destroy", () => {
             $timeout.cancel(undoTimeout);
         });
 
@@ -107,7 +108,7 @@
         // Apply is needed because pubNub callbacks are executed from outside of angular's scope
         // Timeout is needed because there is no guarantee that the "ANY" callback gets called later than other event callbacks
         function applyChangesAsync() {
-            $timeout(function() {
+            $timeout(() => {
                 $scope.$apply();
             });
         }
