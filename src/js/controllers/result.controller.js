@@ -98,7 +98,8 @@
 
             sendSettingsToUser(user);
             $scope.cards.push(card);
-            $scope.reset();
+            
+            $scope.flip = false;
         }
 
         function onUserUndo(data) {
